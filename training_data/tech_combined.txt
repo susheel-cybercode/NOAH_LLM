@@ -1,0 +1,4385 @@
+
+
+RFC:  791
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                           INTERNET PROTOCOL
+                                    
+                                    
+                         DARPA INTERNET PROGRAM
+                                    
+                         PROTOCOL SPECIFICATION
+                                    
+                                    
+                                    
+                             September 1981
+
+
+
+
+
+
+
+
+
+
+
+
+
+                              prepared for
+
+               Defense Advanced Research Projects Agency
+                Information Processing Techniques Office
+                         1400 Wilson Boulevard
+                       Arlington, Virginia  22209
+
+
+
+
+
+
+
+                                   by
+
+                     Information Sciences Institute
+                   University of Southern California
+                           4676 Admiralty Way
+                   Marina del Rey, California  90291
+
+
+
+September 1981                                                          
+                                                       Internet Protocol
+
+
+
+                           TABLE OF CONTENTS
+
+    PREFACE ........................................................ iii
+
+1.  INTRODUCTION ..................................................... 1
+
+  1.1  Motivation .................................................... 1
+  1.2  Scope ......................................................... 1
+  1.3  Interfaces .................................................... 1
+  1.4  Operation ..................................................... 2
+
+2.  OVERVIEW ......................................................... 5
+
+  2.1  Relation to Other Protocols ................................... 9
+  2.2  Model of Operation ............................................ 5
+  2.3  Function Description .......................................... 7
+  2.4  Gateways ...................................................... 9
+
+3.  SPECIFICATION ................................................... 11
+
+  3.1  Internet Header Format ....................................... 11
+  3.2  Discussion ................................................... 23
+  3.3  Interfaces ................................................... 31
+
+APPENDIX A:  Examples & Scenarios ................................... 34
+APPENDIX B:  Data Transmission Order ................................ 39
+
+GLOSSARY ............................................................ 41
+
+REFERENCES .......................................................... 45
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                [Page i]
+
+
+                                                          September 1981
+Internet Protocol
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[Page ii]                                                               
+
+
+September 1981                                                          
+                                                       Internet Protocol
+
+
+
+                                PREFACE
+
+
+
+This document specifies the DoD Standard Internet Protocol.  This
+document is based on six earlier editions of the ARPA Internet Protocol
+Specification, and the present text draws heavily from them.  There have
+been many contributors to this work both in terms of concepts and in
+terms of text.  This edition revises aspects of addressing, error
+handling, option codes, and the security, precedence, compartments, and
+handling restriction features of the internet protocol.
+
+                                                           Jon Postel
+
+                                                           Editor
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                              [Page iii]
+
+
+
+                                                          September 1981
+
+
+RFC:  791
+Replaces:  RFC 760
+IENs 128, 123, 111,
+80, 54, 44, 41, 28, 26
+
+                           INTERNET PROTOCOL
+
+                         DARPA INTERNET PROGRAM
+                         PROTOCOL SPECIFICATION
+
+
+
+                            1.  INTRODUCTION
+
+1.1.  Motivation
+
+  The Internet Protocol is designed for use in interconnected systems of
+  packet-switched computer communication networks.  Such a system has
+  been called a "catenet" [1].  The internet protocol provides for
+  transmitting blocks of data called datagrams from sources to
+  destinations, where sources and destinations are hosts identified by
+  fixed length addresses.  The internet protocol also provides for
+  fragmentation and reassembly of long datagrams, if necessary, for
+  transmission through "small packet" networks.
+
+1.2.  Scope
+
+  The internet protocol is specifically limited in scope to provide the
+  functions necessary to deliver a package of bits (an internet
+  datagram) from a source to a destination over an interconnected system
+  of networks.  There are no mechanisms to augment end-to-end data
+  reliability, flow control, sequencing, or other services commonly
+  found in host-to-host protocols.  The internet protocol can capitalize
+  on the services of its supporting networks to provide various types
+  and qualities of service.
+
+1.3.  Interfaces
+
+  This protocol is called on by host-to-host protocols in an internet
+  environment.  This protocol calls on local network protocols to carry
+  the internet datagram to the next gateway or destination host.
+
+  For example, a TCP module would call on the internet module to take a
+  TCP segment (including the TCP header and user data) as the data
+  portion of an internet datagram.  The TCP module would provide the
+  addresses and other parameters in the internet header to the internet
+  module as arguments of the call.  The internet module would then
+  create an internet datagram and call on the local network interface to
+  transmit the internet datagram.
+
+  In the ARPANET case, for example, the internet module would call on a
+
+
+                                                                [Page 1]
+
+
+                                                          September 1981
+Internet Protocol
+Introduction
+
+
+
+  local net module which would add the 1822 leader [2] to the internet
+  datagram creating an ARPANET message to transmit to the IMP.  The
+  ARPANET address would be derived from the internet address by the
+  local network interface and would be the address of some host in the
+  ARPANET, that host might be a gateway to other networks.
+
+1.4.  Operation
+
+  The internet protocol implements two basic functions:  addressing and
+  fragmentation.
+
+  The internet modules use the addresses carried in the internet header
+  to transmit internet datagrams toward their destinations.  The
+  selection of a path for transmission is called routing.
+
+  The internet modules use fields in the internet header to fragment and
+  reassemble internet datagrams when necessary for transmission through
+  "small packet" networks.
+
+  The model of operation is that an internet module resides in each host
+  engaged in internet communication and in each gateway that
+  interconnects networks.  These modules share common rules for
+  interpreting address fields and for fragmenting and assembling
+  internet datagrams.  In addition, these modules (especially in
+  gateways) have procedures for making routing decisions and other
+  functions.
+
+  The internet protocol treats each internet datagram as an independent
+  entity unrelated to any other internet datagram.  There are no
+  connections or logical circuits (virtual or otherwise).
+
+  The internet protocol uses four key mechanisms in providing its
+  service:  Type of Service, Time to Live, Options, and Header Checksum.
+
+  The Type of Service is used to indicate the quality of the service
+  desired.  The type of service is an abstract or generalized set of
+  parameters which characterize the service choices provided in the
+  networks that make up the internet.  This type of service indication
+  is to be used by gateways to select the actual transmission parameters
+  for a particular network, the network to be used for the next hop, or
+  the next gateway when routing an internet datagram.
+
+  The Time to Live is an indication of an upper bound on the lifetime of
+  an internet datagram.  It is set by the sender of the datagram and
+  reduced at the points along the route where it is processed.  If the
+  time to live reaches zero before the internet datagram reaches its
+  destination, the internet datagram is destroyed.  The time to live can
+  be thought of as a self destruct time limit.
+
+
+[Page 2]                                                                
+
+
+September 1981                                                          
+                                                       Internet Protocol
+                                                            Introduction
+
+
+
+  The Options provide for control functions needed or useful in some
+  situations but unnecessary for the most common communications.  The
+  options include provisions for timestamps, security, and special
+  routing.
+
+  The Header Checksum provides a verification that the information used
+  in processing internet datagram has been transmitted correctly.  The
+  data may contain errors.  If the header checksum fails, the internet
+  datagram is discarded at once by the entity which detects the error.
+
+  The internet protocol does not provide a reliable communication
+  facility.  There are no acknowledgments either end-to-end or
+  hop-by-hop.  There is no error control for data, only a header
+  checksum.  There are no retransmissions.  There is no flow control.
+
+  Errors detected may be reported via the Internet Control Message
+  Protocol (ICMP) [3] which is implemented in the internet protocol
+  module.
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                [Page 3]
+
+
+                                                          September 1981
+Internet Protocol
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[Page 4]                                                                
+
+
+September 1981                                                          
+                                                       Internet Protocol
+
+
+
+                              2.  OVERVIEW
+
+2.1.  Relation to Other Protocols
+
+  The following diagram illustrates the place of the internet protocol
+  in the protocol hierarchy:
+
+                                    
+                 +------+ +-----+ +-----+     +-----+  
+                 |Telnet| | FTP | | TFTP| ... | ... |  
+                 +------+ +-----+ +-----+     +-----+  
+                       |   |         |           |     
+                      +-----+     +-----+     +-----+  
+                      | TCP |     | UDP | ... | ... |  
+                      +-----+     +-----+     +-----+  
+                         |           |           |     
+                      +--------------------------+----+
+                      |    Internet Protocol & ICMP   |
+                      +--------------------------+----+
+                                     |                 
+                        +---------------------------+  
+                        |   Local Network Protocol  |  
+                        +---------------------------+  
+
+                         Protocol Relationships
+
+                               Figure 1.
+
+  Internet protocol interfaces on one side to the higher level
+  host-to-host protocols and on the other side to the local network
+  protocol.  In this context a "local network" may be a small network in
+  a building or a large network such as the ARPANET.
+
+2.2.  Model of Operation
+
+  The  model of operation for transmitting a datagram from one
+  application program to another is illustrated by the following
+  scenario:
+
+    We suppose that this transmission will involve one intermediate
+    gateway.
+
+    The sending application program prepares its data and calls on its
+    local internet module to send that data as a datagram and passes the
+    destination address and other parameters as arguments of the call.
+
+    The internet module prepares a datagram header and attaches the data
+    to it.  The internet module determines a local network address for
+    this internet address, in this case it is the address of a gateway.
+
+
+                                                                [Page 5]
+
+
+                                                          September 1981
+Internet Protocol
+Overview
+
+
+
+    It sends this datagram and the local network address to the local
+    network interface.
+
+    The local network interface creates a local network header, and
+    attaches the datagram to it, then sends the result via the local
+    network.
+
+    The datagram arrives at a gateway host wrapped in the local network
+    header, the local network interface strips off this header, and
+    turns the datagram over to the internet module.  The internet module
+    determines from the internet address that the datagram is to be
+    forwarded to another host in a second network.  The internet module
+    determines a local net address for the destination host.  It calls
+    on the local network interface for that network to send the
+    datagram.
+
+    This local network interface creates a local network header and
+    attaches the datagram sending the result to the destination host.
+
+    At this destination host the datagram is stripped of the local net
+    header by the local network interface and handed to the internet
+    module.
+
+    The internet module determines that the datagram is for an
+    application program in this host.  It passes the data to the
+    application program in response to a system call, passing the source
+    address and other parameters as results of the call.
+
+                                    
+   Application                                           Application
+   Program                                                   Program
+         \                                                   /      
+       Internet Module      Internet Module      Internet Module    
+             \                 /       \                /           
+             LNI-1          LNI-1      LNI-2         LNI-2          
+                \           /             \          /              
+               Local Network 1           Local Network 2            
+
+
+
+                            Transmission Path
+
+                                Figure 2
+
+
+
+
+
+
+
+[Page 6]                                                                
+
+
+September 1981                                                          
+                                                       Internet Protocol
+                                                                Overview
+
+
+
+2.3.  Function Description
+
+  The function or purpose of Internet Protocol is to move datagrams
+  through an interconnected set of networks.  This is done by passing
+  the datagrams from one internet module to another until the
+  destination is reached.  The internet modules reside in hosts and
+  gateways in the internet system.  The datagrams are routed from one
+  internet module to another through individual networks based on the
+  interpretation of an internet address.  Thus, one important mechanism
+  of the internet protocol is the internet address.
+
+  In the routing of messages from one internet module to another,
+  datagrams may need to traverse a network whose maximum packet size is
+  smaller than the size of the datagram.  To overcome this difficulty, a
+  fragmentation mechanism is provided in the internet protocol.
+
+  Addressing
+
+    A distinction is made between names, addresses, and routes [4].   A
+    name indicates what we seek.  An address indicates where it is.  A
+    route indicates how to get there.  The internet protocol deals
+    primarily with addresses.  It is the task of higher level (i.e.,
+    host-to-host or application) protocols to make the mapping from
+    names to addresses.   The internet module maps internet addresses to
+    local net addresses.  It is the task of lower level (i.e., local net
+    or gateways) procedures to make the mapping from local net addresses
+    to routes.
+
+    Addresses are fixed length of four octets (32 bits).  An address
+    begins with a network number, followed by local address (called the
+    "rest" field).  There are three formats or classes of internet
+    addresses:  in class a, the high order bit is zero, the next 7 bits
+    are the network, and the last 24 bits are the local address; in
+    class b, the high order two bits are one-zero, the next 14 bits are
+    the network and the last 16 bits are the local address; in class c,
+    the high order three bits are one-one-zero, the next 21 bits are the
+    network and the last 8 bits are the local address.
+
+    Care must be taken in mapping internet addresses to local net
+    addresses; a single physical host must be able to act as if it were
+    several distinct hosts to the extent of using several distinct
+    internet addresses.  Some hosts will also have several physical
+    interfaces (multi-homing).
+
+    That is, provision must be made for a host to have several physical
+    interfaces to the network with each having several logical internet
+    addresses.
+
+
+
+                                                                [Page 7]
+
+
+                                                          September 1981
+Internet Protocol
+Overview
+
+
+
+    Examples of address mappings may be found in "Address Mappings" [5].
+
+  Fragmentation
+
+    Fragmentation of an internet datagram is necessary when it
+    originates in a local net that allows a large packet size and must
+    traverse a local net that limits packets to a smaller size to reach
+    its destination.
+
+    An internet datagram can be marked "don't fragment."  Any internet
+    datagram so marked is not to be internet fragmented under any
+    circumstances.  If internet datagram marked don't fragment cannot be
+    delivered to its destination without fragmenting it, it is to be
+    discarded instead.
+
+    Fragmentation, transmission and reassembly across a local network
+    which is invisible to the internet protocol module is called
+    intranet fragmentation and may be used [6].
+
+    The internet fragmentation and reassembly procedure needs to be able
+    to break a datagram into an almost arbitrary number of pieces that
+    can be later reassembled.  The receiver of the fragments uses the
+    identification field to ensure that fragments of different datagrams
+    are not mixed.  The fragment offset field tells the receiver the
+    position of a fragment in the original datagram.  The fragment
+    offset and length determine the portion of the original datagram
+    covered by this fragment.  The more-fragments flag indicates (by
+    being reset) the last fragment.  These fields provide sufficient
+    information to reassemble datagrams.
+
+    The identification field is used to distinguish the fragments of one
+    datagram from those of another.  The originating protocol module of
+    an internet datagram sets the identification field to a value that
+    must be unique for that source-destination pair and protocol for the
+    time the datagram will be active in the internet system.  The
+    originating protocol module of a complete datagram sets the
+    more-fragments flag to zero and the fragment offset to zero.
+
+    To fragment a long internet datagram, an internet protocol module
+    (for example, in a gateway), creates two new internet datagrams and
+    copies the contents of the internet header fields from the long
+    datagram into both new internet headers.  The data of the long
+    datagram is divided into two portions on a 8 octet (64 bit) boundary
+    (the second portion might not be an integral multiple of 8 octets,
+    but the first must be).  Call the number of 8 octet blocks in the
+    first portion NFB (for Number of Fragment Blocks).  The first
+    portion of the data is placed in the first new internet datagram,
+    and the total length field is set to the length of the first
+
+
+[Page 8] 
+
+
+September 1981 
+                                                       Internet Protocol
+                                                                Overview
+
+
+
+    datagram.  The more-fragments flag is set to one.  The second
+    portion of the data is placed in the second new internet datagram,
+    and the total length field is set to the length of the second
+    datagram.  The more-fragments flag carries the same value as the
+    long datagram.  The fragment offset field of the second new internet
+    datagram is set to the value of that field in the long datagram plus
+    NFB.
+
+    This procedure can be generalized for an n-way split, rather than
+    the two-way split described.
+
+    To assemble the fragments of an internet datagram, an internet
+    protocol module (for example at a destination host) combines
+    internet datagrams that all have the same value for the four fields:
+    identification, source, destination, and protocol.  The combination
+    is done by placing the data portion of each fragment in the relative
+    position indicated by the fragment offset in that fragment's
+    internet header.  The first fragment will have the fragment offset
+    zero, and the last fragment will have the more-fragments flag reset
+    to zero.
+
+2.4.  Gateways
+
+  Gateways implement internet protocol to forward datagrams between
+  networks.  Gateways also implement the Gateway to Gateway Protocol
+  (GGP) [7] to coordinate routing and other internet control
+  information.
+
+  In a gateway the higher level protocols need not be implemented and
+  the GGP functions are added to the IP module.
+
+                                    
+                   +-------------------------------+   
+                   | Internet Protocol & ICMP & GGP|   
+                   +-------------------------------+   
+                           |                 |         
+                 +---------------+   +---------------+ 
+                 |   Local Net   |   |   Local Net   | 
+                 +---------------+   +---------------+ 
+
+                           Gateway Protocols
+
+                               Figure 3.
+
+  
+
+
+
+
+
+                                                                [Page 9]
+
+
+                                                          September 1981
+Internet Protocol
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[Page 10]                                                               
+
+
+September 1981                                                          
+                                                       Internet Protocol
+
+
+
+                           3.  SPECIFICATION
+
+3.1.  Internet Header Format
+
+  A summary of the contents of the internet header follows:
+
+                                    
+    0                   1                   2                   3   
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |Version|  IHL  |Type of Service|          Total Length         |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |         Identification        |Flags|      Fragment Offset    |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |  Time to Live |    Protocol   |         Header Checksum       |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                       Source Address                          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                    Destination Address                        |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                    Options                    |    Padding    |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+                    Example Internet Datagram Header
+
+                               Figure 4.
+
+  Note that each tick mark represents one bit position.
+
+  Version:  4 bits
+
+    The Version field indicates the format of the internet header.  This
+    document describes version 4.
+
+  IHL:  4 bits
+
+    Internet Header Length is the length of the internet header in 32
+    bit words, and thus points to the beginning of the data.  Note that
+    the minimum value for a correct header is 5.
+
+
+
+
+
+
+
+
+
+
+
+
+                                                               [Page 11]
+
+
+                                                          September 1981
+Internet Protocol
+Specification
+
+
+
+  Type of Service:  8 bits
+
+    The Type of Service provides an indication of the abstract
+    parameters of the quality of service desired.  These parameters are
+    to be used to guide the selection of the actual service parameters
+    when transmitting a datagram through a particular network.  Several
+    networks offer service precedence, which somehow treats high
+    precedence traffic as more important than other traffic (generally
+    by accepting only traffic above a certain precedence at time of high
+    load).  The major choice is a three way tradeoff between low-delay,
+    high-reliability, and high-throughput.
+
+      Bits 0-2:  Precedence.
+      Bit    3:  0 = Normal Delay,      1 = Low Delay.
+      Bits   4:  0 = Normal Throughput, 1 = High Throughput.
+      Bits   5:  0 = Normal Relibility, 1 = High Relibility.
+      Bit  6-7:  Reserved for Future Use.
+
+         0     1     2     3     4     5     6     7
+      +-----+-----+-----+-----+-----+-----+-----+-----+
+      |                 |     |     |     |     |     |
+      |   PRECEDENCE    |  D  |  T  |  R  |  0  |  0  |
+      |                 |     |     |     |     |     |
+      +-----+-----+-----+-----+-----+-----+-----+-----+
+
+        Precedence
+
+          111 - Network Control
+          110 - Internetwork Control
+          101 - CRITIC/ECP
+          100 - Flash Override
+          011 - Flash
+          010 - Immediate
+          001 - Priority
+          000 - Routine
+
+    The use of the Delay, Throughput, and Reliability indications may
+    increase the cost (in some sense) of the service.  In many networks
+    better performance for one of these parameters is coupled with worse
+    performance on another.  Except for very unusual cases at most two
+    of these three indications should be set.
+
+    The type of service is used to specify the treatment of the datagram
+    during its transmission through the internet system.  Example
+    mappings of the internet type of service to the actual service
+    provided on networks such as AUTODIN II, ARPANET, SATNET, and PRNET
+    is given in "Service Mappings" [8].
+
+
+
+[Page 12]                                                               
+
+
+September 1981                                                          
+                                                       Internet Protocol
+                                                           Specification
+
+
+
+    The Network Control precedence designation is intended to be used
+    within a network only.  The actual use and control of that
+    designation is up to each network. The Internetwork Control
+    designation is intended for use by gateway control originators only.
+    If the actual use of these precedence designations is of concern to
+    a particular network, it is the responsibility of that network to
+    control the access to, and use of, those precedence designations.
+
+  Total Length:  16 bits
+
+    Total Length is the length of the datagram, measured in octets,
+    including internet header and data.  This field allows the length of
+    a datagram to be up to 65,535 octets.  Such long datagrams are
+    impractical for most hosts and networks.  All hosts must be prepared
+    to accept datagrams of up to 576 octets (whether they arrive whole
+    or in fragments).  It is recommended that hosts only send datagrams
+    larger than 576 octets if they have assurance that the destination
+    is prepared to accept the larger datagrams.
+
+    The number 576 is selected to allow a reasonable sized data block to
+    be transmitted in addition to the required header information.  For
+    example, this size allows a data block of 512 octets plus 64 header
+    octets to fit in a datagram.  The maximal internet header is 60
+    octets, and a typical internet header is 20 octets, allowing a
+    margin for headers of higher level protocols.
+
+  Identification:  16 bits
+
+    An identifying value assigned by the sender to aid in assembling the
+    fragments of a datagram.
+
+  Flags:  3 bits
+
+    Various Control Flags.
+
+      Bit 0: reserved, must be zero
+      Bit 1: (DF) 0 = May Fragment,  1 = Don't Fragment.
+      Bit 2: (MF) 0 = Last Fragment, 1 = More Fragments.
+
+          0   1   2
+        +---+---+---+
+        |   | D | M |
+        | 0 | F | F |
+        +---+---+---+
+
+  Fragment Offset:  13 bits
+
+    This field indicates where in the datagram this fragment belongs.
+
+
+                                                               [Page 13]
+
+
+                                                          September 1981
+Internet Protocol
+Specification
+
+
+
+    The fragment offset is measured in units of 8 octets (64 bits).  The
+    first fragment has offset zero.
+
+  Time to Live:  8 bits
+
+    This field indicates the maximum time the datagram is allowed to
+    remain in the internet system.  If this field contains the value
+    zero, then the datagram must be destroyed.  This field is modified
+    in internet header processing.  The time is measured in units of
+    seconds, but since every module that processes a datagram must
+    decrease
+
+
+
+RFC: 793
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                     TRANSMISSION CONTROL PROTOCOL
+                                    
+                                    
+                         DARPA INTERNET PROGRAM
+                                    
+                         PROTOCOL SPECIFICATION
+                                    
+                                    
+                                    
+                             September 1981
+
+
+
+
+
+
+
+
+
+
+
+
+
+                              prepared for
+                                    
+               Defense Advanced Research Projects Agency
+                Information Processing Techniques Office
+                         1400 Wilson Boulevard
+                       Arlington, Virginia  22209
+
+
+
+
+
+
+
+                                   by
+
+                     Information Sciences Institute
+                   University of Southern California
+                           4676 Admiralty Way
+                   Marina del Rey, California  90291
+
+
+
+September 1981                                                          
+                                           Transmission Control Protocol
+
+
+
+                           TABLE OF CONTENTS
+
+    PREFACE ........................................................ iii
+
+1.  INTRODUCTION ..................................................... 1
+
+  1.1  Motivation .................................................... 1
+  1.2  Scope ......................................................... 2
+  1.3  About This Document ........................................... 2
+  1.4  Interfaces .................................................... 3
+  1.5  Operation ..................................................... 3
+
+2.  PHILOSOPHY ....................................................... 7
+
+  2.1  Elements of the Internetwork System ........................... 7
+  2.2  Model of Operation ............................................ 7
+  2.3  The Host Environment .......................................... 8
+  2.4  Interfaces .................................................... 9
+  2.5  Relation to Other Protocols ................................... 9
+  2.6  Reliable Communication ........................................ 9
+  2.7  Connection Establishment and Clearing ........................ 10
+  2.8  Data Communication ........................................... 12
+  2.9  Precedence and Security ...................................... 13
+  2.10 Robustness Principle ......................................... 13
+
+3.  FUNCTIONAL SPECIFICATION ........................................ 15
+
+  3.1  Header Format ................................................ 15
+  3.2  Terminology .................................................. 19
+  3.3  Sequence Numbers ............................................. 24
+  3.4  Establishing a connection .................................... 30
+  3.5  Closing a Connection ......................................... 37
+  3.6  Precedence and Security ...................................... 40
+  3.7  Data Communication ........................................... 40
+  3.8  Interfaces ................................................... 44
+  3.9  Event Processing ............................................. 52
+
+GLOSSARY ............................................................ 79
+
+REFERENCES .......................................................... 85
+
+
+
+
+
+
+
+
+
+
+
+                                                                [Page i]
+
+
+                                                          September 1981
+Transmission Control Protocol
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[Page ii]                                                               
+
+
+September 1981                                                          
+                                           Transmission Control Protocol
+
+
+
+                                PREFACE
+
+
+
+This document describes the DoD Standard Transmission Control Protocol
+(TCP).  There have been nine earlier editions of the ARPA TCP
+specification on which this standard is based, and the present text
+draws heavily from them.  There have been many contributors to this work
+both in terms of concepts and in terms of text.  This edition clarifies
+several details and removes the end-of-letter buffer-size adjustments,
+and redescribes the letter mechanism as a push function.
+
+                                                           Jon Postel
+
+                                                           Editor
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                              [Page iii]
+
+
+
+
+RFC:  793
+Replaces: RFC 761
+IENs:  129, 124, 112, 81,
+55, 44, 40, 27, 21, 5
+
+                     TRANSMISSION CONTROL PROTOCOL
+
+                         DARPA INTERNET PROGRAM
+                         PROTOCOL SPECIFICATION
+
+
+
+                            1.  INTRODUCTION
+
+The Transmission Control Protocol (TCP) is intended for use as a highly
+reliable host-to-host protocol between hosts in packet-switched computer
+communication networks, and in interconnected systems of such networks.
+
+This document describes the functions to be performed by the
+Transmission Control Protocol, the program that implements it, and its
+interface to programs or users that require its services.
+
+1.1.  Motivation
+
+  Computer communication systems are playing an increasingly important
+  role in military, government, and civilian environments.  This
+  document focuses its attention primarily on military computer
+  communication requirements, especially robustness in the presence of
+  communication unreliability and availability in the presence of
+  congestion, but many of these problems are found in the civilian and
+  government sector as well.
+
+  As strategic and tactical computer communication networks are
+  developed and deployed, it is essential to provide means of
+  interconnecting them and to provide standard interprocess
+  communication protocols which can support a broad range of
+  applications.  In anticipation of the need for such standards, the
+  Deputy Undersecretary of Defense for Research and Engineering has
+  declared the Transmission Control Protocol (TCP) described herein to
+  be a basis for DoD-wide inter-process communication protocol
+  standardization.
+
+  TCP is a connection-oriented, end-to-end reliable protocol designed to
+  fit into a layered hierarchy of protocols which support multi-network
+  applications.  The TCP provides for reliable inter-process
+  communication between pairs of processes in host computers attached to
+  distinct but interconnected computer communication networks.  Very few
+  assumptions are made as to the reliability of the communication
+  protocols below the TCP layer.  TCP assumes it can obtain a simple,
+  potentially unreliable datagram service from the lower level
+  protocols.  In principle, the TCP should be able to operate above a
+  wide spectrum of communication systems ranging from hard-wired
+  connections to packet-switched or circuit-switched networks.
+
+
+                                                                [Page 1]
+
+
+                                                          September 1981
+Transmission Control Protocol
+Introduction
+
+
+
+  TCP is based on concepts first described by Cerf and Kahn in [1].  The
+  TCP fits into a layered protocol architecture just above a basic
+  Internet Protocol [2] which provides a way for the TCP to send and
+  receive variable-length segments of information enclosed in internet
+  datagram "envelopes".  The internet datagram provides a means for
+  addressing source and destination TCPs in different networks.  The
+  internet protocol also deals with any fragmentation or reassembly of
+  the TCP segments required to achieve transport and delivery through
+  multiple networks and interconnecting gateways.  The internet protocol
+  also carries information on the precedence, security classification
+  and compartmentation of the TCP segments, so this information can be
+  communicated end-to-end across multiple networks.
+
+                           Protocol Layering
+
+                        +---------------------+
+                        |     higher-level    |
+                        +---------------------+
+                        |        TCP          |
+                        +---------------------+
+                        |  internet protocol  |
+                        +---------------------+
+                        |communication network|
+                        +---------------------+
+
+                                Figure 1
+
+  Much of this document is written in the context of TCP implementations
+  which are co-resident with higher level protocols in the host
+  computer.  Some computer systems will be connected to networks via
+  front-end computers which house the TCP and internet protocol layers,
+  as well as network specific software.  The TCP specification describes
+  an interface to the higher level protocols which appears to be
+  implementable even for the front-end case, as long as a suitable
+  host-to-front end protocol is implemented.
+
+1.2.  Scope
+
+  The TCP is intended to provide a reliable process-to-process
+  communication service in a multinetwork environment.  The TCP is
+  intended to be a host-to-host protocol in common use in multiple
+  networks.
+
+1.3.  About this Document
+
+  This document represents a specification of the behavior required of
+  any TCP implementation, both in its interactions with higher level
+  protocols and in its interactions with other TCPs.  The rest of this
+
+
+[Page 2]                                                                
+
+
+September 1981                                                          
+                                           Transmission Control Protocol
+                                                            Introduction
+
+
+
+  section offers a very brief view of the protocol interfaces and
+  operation.  Section 2 summarizes the philosophical basis for the TCP
+  design.  Section 3 offers both a detailed description of the actions
+  required of TCP when various events occur (arrival of new segments,
+  user calls, errors, etc.) and the details of the formats of TCP
+  segments.
+
+1.4.  Interfaces
+
+  The TCP interfaces on one side to user or application processes and on
+  the other side to a lower level protocol such as Internet Protocol.
+
+  The interface between an application process and the TCP is
+  illustrated in reasonable detail.  This interface consists of a set of
+  calls much like the calls an operating system provides to an
+  application process for manipulating files.  For example, there are
+  calls to open and close connections and to send and receive data on
+  established connections.  It is also expected that the TCP can
+  asynchronously communicate with application programs.  Although
+  considerable freedom is permitted to TCP implementors to design
+  interfaces which are appropriate to a particular operating system
+  environment, a minimum functionality is required at the TCP/user
+  interface for any valid implementation.
+
+  The interface between TCP and lower level protocol is essentially
+  unspecified except that it is assumed there is a mechanism whereby the
+  two levels can asynchronously pass information to each other.
+  Typically, one expects the lower level protocol to specify this
+  interface.  TCP is designed to work in a very general environment of
+  interconnected networks.  The lower level protocol which is assumed
+  throughout this document is the Internet Protocol [2].
+
+1.5.  Operation
+
+  As noted above, the primary purpose of the TCP is to provide reliable,
+  securable logical circuit or connection service between pairs of
+  processes.  To provide this service on top of a less reliable internet
+  communication system requires facilities in the following areas:
+
+    Basic Data Transfer
+    Reliability
+    Flow Control
+    Multiplexing
+    Connections
+    Precedence and Security
+
+  The basic operation of the TCP in each of these areas is described in
+  the following paragraphs.
+
+
+                                                                [Page 3]
+
+
+                                                          September 1981
+Transmission Control Protocol
+Introduction
+
+
+
+  Basic Data Transfer:
+
+    The TCP is able to transfer a continuous stream of octets in each
+    direction between its users by packaging some number of octets into
+    segments for transmission through the internet system.  In general,
+    the TCPs decide when to block and forward data at their own
+    convenience.
+
+    Sometimes users need to be sure that all the data they have
+    submitted to the TCP has been transmitted.  For this purpose a push
+    function is defined.  To assure that data submitted to a TCP is
+    actually transmitted the sending user indicates that it should be
+    pushed through to the receiving user.  A push causes the TCPs to
+    promptly forward and deliver data up to that point to the receiver.
+    The exact push point might not be visible to the receiving user and
+    the push function does not supply a record boundary marker.
+
+  Reliability:
+
+    The TCP must recover from data that is damaged, lost, duplicated, or
+    delivered out of order by the internet communication system.  This
+    is achieved by assigning a sequence number to each octet
+    transmitted, and requiring a positive acknowledgment (ACK) from the
+    receiving TCP.  If the ACK is not received within a timeout
+    interval, the data is retransmitted.  At the receiver, the sequence
+    numbers are used to correctly order segments that may be received
+    out of order and to eliminate duplicates.  Damage is handled by
+    adding a checksum to each segment transmitted, checking it at the
+    receiver, and discarding damaged segments.
+
+    As long as the TCPs continue to function properly and the internet
+    system does not become completely partitioned, no transmission
+    errors will affect the correct delivery of data.  TCP recovers from
+    internet communication system errors.
+
+  Flow Control:
+
+    TCP provides a means for the receiver to govern the amount of data
+    sent by the sender.  This is achieved by returning a "window" with
+    every ACK indicating a range of acceptable sequence numbers beyond
+    the last segment successfully received.  The window indicates an
+    allowed number of octets that the sender may transmit before
+    receiving further permission.
+
+
+
+
+
+
+
+[Page 4]                                                                
+
+
+September 1981                                                          
+                                           Transmission Control Protocol
+                                                            Introduction
+
+
+
+  Multiplexing:
+
+    To allow for many processes within a single Host to use TCP
+    communication facilities simultaneously, the TCP provides a set of
+    addresses or ports within each host.  Concatenated with the network
+    and host addresses from the internet communication layer, this forms
+    a socket.  A pair of sockets uniquely identifies each connection.
+    That is, a socket may be simultaneously used in multiple
+    connections.
+
+    The binding of ports to processes is handled independently by each
+    Host.  However, it proves useful to attach frequently used processes
+    (e.g., a "logger" or timesharing service) to fixed sockets which are
+    made known to the public.  These services can then be accessed
+    through the known addresses.  Establishing and learning the port
+    addresses of other processes may involve more dynamic mechanisms.
+
+  Connections:
+
+    The reliability and flow control mechanisms described above require
+    that TCPs initialize and maintain certain status information for
+    each data stream.  The combination of this information, including
+    sockets, sequence numbers, and window sizes, is called a connection.
+    Each connection is uniquely specified by a pair of sockets
+    identifying its two sides.
+
+    When two processes wish to communicate, their TCP's must first
+    establish a connection (initialize the status information on each
+    side).  When their communication is complete, the connection is
+    terminated or closed to free the resources for other uses.
+
+    Since connections must be established between unreliable hosts and
+    over the unreliable internet communication system, a handshake
+    mechanism with clock-based sequence numbers is used to avoid
+    erroneous initialization of connections.
+
+  Precedence and Security:
+
+    The users of TCP may indicate the security and precedence of their
+    communication.  Provision is made for default values to be used when
+    these features are not needed.
+
+    
+
+
+
+
+
+
+
+                                                                [Page 5]
+
+
+                                                          September 1981
+Transmission Control Protocol
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[Page 6]                                                                
+
+
+September 1981                                                          
+                                           Transmission Control Protocol
+
+
+
+                             2.  PHILOSOPHY
+
+2.1.  Elements of the Internetwork System
+
+  The internetwork environment consists of hosts connected to networks
+  which are in turn interconnected via gateways.  It is assumed here
+  that the networks may be either local networks (e.g., the ETHERNET) or
+  large networks (e.g., the ARPANET), but in any case are based on
+  packet switching technology.  The active agents that produce and
+  consume messages are processes.  Various levels of protocols in the
+  networks, the gateways, and the hosts support an interprocess
+  communication system that provides two-way data flow on logical
+  connections between process ports.
+
+  The term packet is used generically here to mean the data of one
+  transaction between a host and its network.  The format of data blocks
+  exchanged within the a network will generally not be of concern to us.
+
+  Hosts are computers attached to a network, and from the communication
+  network's point of view, are the sources and destinations of packets.
+  Processes are viewed as the active elements in host computers (in
+  accordance with the fairly common definition of a process as a program
+  in execution).  Even terminals and files or other I/O devices are
+  viewed as communicating with each other through the use of processes.
+  Thus, all communication is viewed as inter-process communication.
+
+  Since a process may need to distinguish among several communication
+  streams between itself and another process (or processes), we imagine
+  that each process may have a number of ports through which it
+  communicates with the ports of other processes.
+
+2.2.  Model of Operation
+
+  Processes transmit data by calling on the TCP and passing buffers of
+  data as arguments.  The TCP packages the data from these buffers into
+  segments and calls on the internet module to transmit each segment to
+  the destination TCP.  The receiving TCP places the data from a segment
+  into the receiving user's buffer and notifies the receiving user.  The
+  TCPs include control information in the segments which they use to
+  ensure reliable ordered data transmission.
+
+  The model of internet communication is that there is an internet
+  protocol module associated with each TCP which provides an interface
+  to the local network.  This internet module packages TCP segments
+  inside internet datagrams and routes these datagrams to a destination
+  internet module or intermediate gateway.  To transmit the datagram
+  through the local network, it is embedded in a local network packet.
+
+  The packet switches may perform further packaging, fragmentation, or
+
+
+                                                                [Page 7]
+
+
+                                                          September 1981
+Transmission Control Protocol
+Philosophy
+
+
+
+  other operations to achieve the delivery of the local packet to the
+  destination internet module.
+
+  At a gateway between networks, the internet datagram is "unwrapped"
+  from its local packet and examined to determine through which network
+  the internet datagram should travel next.  The internet datagram is
+  then "wrapped" in a local packet suitable to the next network and
+  routed to the next gateway, or to the final destination.
+
+  A gateway is permitted to break up an internet datagram into smaller
+  internet datagram fragments if this is necessary for transmission
+  through the next network.  To do this, the gateway produces a set of
+  internet datagrams; each carrying a fragment.  Fragments may be
+  further broken into smaller fragments at subsequent gateways.  The
+  internet datagram fragment format is designed so that the destination
+  internet module can reassemble fragments into internet datagrams.
+
+  A destination internet module unwraps the segment from the datagram
+  (after reassembling the datagram, if necessary) and passes it to the
+  destination TCP.
+
+  This simple model of the operation glosses over many details.  One
+  important feature is the type of service.  This provides information
+  to the gateway (or internet module) to guide it in selecting the
+  service parameters to be used in traversing the next network.
+  Included in the type of service information is the precedence of the
+  datagram.  Datagrams may also carry security information to permit
+  host and gateways that operate in multilevel secure environments to
+  properly segregate datagrams for security considerations.
+
+2.3.  The Host Environment
+
+  The TCP is assumed to be a module in an operating system.  The users
+  access the TCP much like they would access the file system.  The TCP
+  may call on other operating system functions, for example, to manage
+  data structures.  The actual interface to the network is assumed to be
+  controlled by a device driver module.  The TCP does not call on the
+  network device driver directly, but rather calls on the internet
+  datagram protocol module which may in turn call on the device driver.
+
+  The mechanisms of TCP do not preclude implementation of the TCP in a
+  front-end processor.  However, in such an implementation, a
+  host-to-front-end protocol must provide the functionality to support
+  the type of TCP-user interface described in this document.
+
+
+
+
+
+
+[Page 8]                                                                
+
+
+September 1981                                                          
+                                           Transmission Control Protocol
+                                                              Philosophy
+
+
+
+2.4.  Interfaces
+
+  The TCP/user interface provides for calls made by the user on the TCP
+  to OPEN or CLOSE a connection, to SEND or RECEIVE data, or to obtain
+  STATUS about a connection.  These calls are like other calls from user
+  programs on the operating system, for example, the calls to open, read
+  from, and close a file.
+
+  The TCP/internet interface provides calls to send and receive
+  datagrams addressed to TCP modules in hosts anywhere in the internet
+  system.  These calls have parameters for passing the address, type of
+  service, precedence, security, and other control information.
+
+2.5.  Relation to Other Protocols
+
+  The following diagram illustrates the place of the TCP in the protocol
+  hierarchy:
+
+                                    
+       +------+ +-----+ +-----+       +-----+                    
+       |Telnet| | FTP | |Voice|  ...  |     |  Application Level 
+       +------+ +-----+ +-----+       +-----+                    
+             |   |         |             |                       
+            +-----+     +-----+       +-----+                    
+            | TCP |     | RTP |  ...  |     |  Host Level        
+            +-----+     +-----+       +-----+                    
+               |           |             |                       
+            +-------------------------------+                    
+            |    Internet Protocol & ICMP   |  Gateway Level     
+            +-------------------------------+                    
+                           |                                     
+              +---------------------------+                      
+              |   Local Network Protocol  |    Network Level     
+              +---------------------------+                      
+
+                         Protocol Relationships
+
+                               Figure 2.
+
+  It is expected that the TCP will be able to support higher level
+  protocols efficiently.  It should be easy to interface higher level
+  protocols like the ARPANET Telnet or AUTODIN II THP to the TCP.
+
+2.6.  Reliable Communication
+
+  A stream of data sent on a TCP connection is delivered reliably and in
+  order at the destination.
+
+
+
+                                                                [Page 9]
+
+
+                                                          September 1981
+Transmission Control Protocol
+Philosophy
+
+
+
+  Transmission is made reliable via the use of sequence numbers and
+  acknowledgments.  Conceptually, each octet of data is assigned a
+  sequence number.  The sequence number of the first octet of data in a
+  segment is transmitted with that segment and is called the segment
+  sequence number.  Segments also carry an acknowledgment number which
+  is the sequence number of the next expected data octet of
+  transmissions in the reverse direction.  When the TCP transmits a
+  segment containing data, it puts a copy on a retransmission queue and
+  starts a timer; when the acknowledgment for that data is received, the
+  segment is deleted from the queue.  If the acknowledgment is not
+  received before the timer runs out, the segment is retransmitted.
+
+  An acknowledgment by TCP does not guarantee that the data has been
+  delivered to the end user, but only that the receiving TCP has taken
+  the responsibility to do so.
+
+  To govern the flow of data between TCPs, a flow control mechanism is
+  employed.  The receiving TCP reports a "window" to the sending TCP.
+  This window specifies the number of octets, starting with the
+  acknowledgment number, that the receiving TCP is currently prepared to
+  receive.
+
+2.7.  Connection Establishment and Clearing
+
+  To identify the separate data streams that a TCP may handle, the TCP
+  provides a port identifier.  Since port identifiers are selected
+  independently by each TCP they might not be unique.  To provide for
+  unique addresses within each TCP, we concatenate an internet address
+  identifying the TCP with a port identifier to create a socket which
+  will be unique throughout all networks connected together.
+
+  A connection is fully specified by the pair of sockets at the ends.  A
+  local socket may participate in many connections to different foreign
+  sockets.  A connection can be used to carry data in both directions,
+  that is, it is "full duplex".
+
+  TCPs are free to associate ports with processes however they choose.
+  However, several basic concepts are necessary in any implementation.
+  There must be well-known sockets which the TCP associates only with
+  the "appropriate" processes by some means.  We envision that processes
+  may "own" ports, and that processes can initiate connections only on
+  the ports they own.  (Means for implementing ownership is a local
+  issue, but we envision a Request Port user command, or a method of
+  uniquely allocating a group of ports to a given process, e.g., by
+  associating the high order bits of a port name with a given process.)
+
+  A connection is specified in the OPEN call by the local port and
+  foreign socket arguments.  In return, the TCP supplies a (short) local
+
+
+[Page 10]                                                               
+
+
+September 1981                                                          
+                                           Transmission Control Protocol
+                                                              Philosophy
+
+
+
+  connection name by which the user refers to the connection in
+  subsequent calls.  There are several things that must be remembered
+  about a connection.  To store this information we imagine that there
+  is a data structure called a Transmission Control Block (TCB).  One
+  implementation strategy would have the local connection name be a
+  pointer to the TCB for this connection.  The OPEN call also specifies
+  whether the connection establishment is to be actively pursued, or to
+  be passively waited for.
+
+  A passive OPEN request means that the process wants to accept incoming
+  connection requests rather than attempting to initiate a connection.
+  Often the process requesting a passive OPEN will accept a connection
+  request from any caller.  In this case a foreign socket of all zeros
+  is used to denote an unspecified socket.  Unspecified foreign sockets
+  are allowed only on passive OPENs.
+
+  A service process that wished to provide services for unknown other
+  processes would issue a passive OPEN request with an unspecified
+  foreign socket.  Then a connection could be made with any process that
+  requested a connection to this local socket.  It would help if this
+  local socket were known to be associated with this service.
+
+  Well-known sockets are a convenient mechanism for a priori associating
+  a socket address with a standard service.  For instance, the
+  "Telnet-Server" process is permanently assigned to a particular
+  socket, and other sockets are reserved for File Transfer, Remote Job
+  Entry, Text Generator, E
+
+
+
+
+
+
+
+Network Working Group                                      R. Fielding
+Request for Comments: 2616                                   UC Irvine
+Obsoletes: 2068                                              J. Gettys
+Category: Standards Track                                   Compaq/W3C
+                                                              J. Mogul
+                                                                Compaq
+                                                            H. Frystyk
+                                                               W3C/MIT
+                                                           L. Masinter
+                                                                 Xerox
+                                                              P. Leach
+                                                             Microsoft
+                                                        T. Berners-Lee
+                                                               W3C/MIT
+                                                             June 1999
+
+
+                Hypertext Transfer Protocol -- HTTP/1.1
+
+Status of this Memo
+
+   This document specifies an Internet standards track protocol for the
+   Internet community, and requests discussion and suggestions for
+   improvements.  Please refer to the current edition of the "Internet
+   Official Protocol Standards" (STD 1) for the standardization state
+   and status of this protocol.  Distribution of this memo is unlimited.
+
+Copyright Notice
+
+   Copyright (C) The Internet Society (1999).  All Rights Reserved.
+
+Abstract
+
+   The Hypertext Transfer Protocol (HTTP) is an application-level
+   protocol for distributed, collaborative, hypermedia information
+   systems. It is a generic, stateless, protocol which can be used for
+   many tasks beyond its use for hypertext, such as name servers and
+   distributed object management systems, through extension of its
+   request methods, error codes and headers [47]. A feature of HTTP is
+   the typing and negotiation of data representation, allowing systems
+   to be built independently of the data being transferred.
+
+   HTTP has been in use by the World-Wide Web global information
+   initiative since 1990. This specification defines the protocol
+   referred to as "HTTP/1.1", and is an update to RFC 2068 [33].
+
+
+
+
+
+
+Fielding, et al.            Standards Track                     [Page 1]
+
+RFC 2616                        HTTP/1.1                       June 1999
+
+
+Table of Contents
+
+   1   Introduction ...................................................7
+   1.1    Purpose......................................................7
+   1.2   Requirements .................................................8
+   1.3   Terminology ..................................................8
+   1.4   Overall Operation ...........................................12
+   2   Notational Conventions and Generic Grammar ....................14
+   2.1   Augmented BNF ...............................................14
+   2.2   Basic Rules .................................................15
+   3   Protocol Parameters ...........................................17
+   3.1   HTTP Version ................................................17
+   3.2   Uniform Resource Identifiers ................................18
+   3.2.1    General Syntax ...........................................19
+   3.2.2    http URL .................................................19
+   3.2.3    URI Comparison ...........................................20
+   3.3   Date/Time Formats ...........................................20
+   3.3.1    Full Date ................................................20
+   3.3.2    Delta Seconds ............................................21
+   3.4   Character Sets ..............................................21
+   3.4.1    Missing Charset ..........................................22
+   3.5   Content Codings .............................................23
+   3.6   Transfer Codings ............................................24
+   3.6.1    Chunked Transfer Coding ..................................25
+   3.7   Media Types .................................................26
+   3.7.1    Canonicalization and Text Defaults .......................27
+   3.7.2    Multipart Types ..........................................27
+   3.8   Product Tokens ..............................................28
+   3.9   Quality Values ..............................................29
+   3.10  Language Tags ...............................................29
+   3.11  Entity Tags .................................................30
+   3.12  Range Units .................................................30
+   4   HTTP Message ..................................................31
+   4.1   Message Types ...............................................31
+   4.2   Message Headers .............................................31
+   4.3   Message Body ................................................32
+   4.4   Message Length ..............................................33
+   4.5   General Header Fields .......................................34
+   5   Request .......................................................35
+   5.1   Request-Line ................................................35
+   5.1.1    Method ...................................................36
+   5.1.2    Request-URI ..............................................36
+   5.2   The Resource Identified by a Request ........................38
+   5.3   Request Header Fields .......................................38
+   6   Response ......................................................39
+   6.1   Status-Line .................................................39
+   6.1.1    Status Code and Reason Phrase ............................39
+   6.2   Response Header Fields ......................................41
+
+
+
+Fielding, et al.            Standards Track                     [Page 2]
+
+RFC 2616                        HTTP/1.1                       June 1999
+
+
+   7   Entity ........................................................42
+   7.1   Entity Header Fields ........................................42
+   7.2   Entity Body .................................................43
+   7.2.1    Type .....................................................43
+   7.2.2    Entity Length ............................................43
+   8   Connections ...................................................44
+   8.1   Persistent Connections ......................................44
+   8.1.1    Purpose ..................................................44
+   8.1.2    Overall Operation ........................................45
+   8.1.3    Proxy Servers ............................................46
+   8.1.4    Practical Considerations .................................46
+   8.2   Message Transmission Requirements ...........................47
+   8.2.1    Persistent Connections and Flow Control ..................47
+   8.2.2    Monitoring Connections for Error Status Messages .........48
+   8.2.3    Use of the 100 (Continue) Status .........................48
+   8.2.4    Client Behavior if Server Prematurely Closes Connection ..50
+   9   Method Definitions ............................................51
+   9.1   Safe and Idempotent Methods .................................51
+   9.1.1    Safe Methods .............................................51
+   9.1.2    Idempotent Methods .......................................51
+   9.2   OPTIONS .....................................................52
+   9.3   GET .........................................................53
+   9.4   HEAD ........................................................54
+   9.5   POST ........................................................54
+   9.6   PUT .........................................................55
+   9.7   DELETE ......................................................56
+   9.8   TRACE .......................................................56
+   9.9   CONNECT .....................................................57
+   10   Status Code Definitions ......................................57
+   10.1  Informational 1xx ...........................................57
+   10.1.1   100 Continue .............................................58
+   10.1.2   101 Switching Protocols ..................................58
+   10.2  Successful 2xx ..............................................58
+   10.2.1   200 OK ...................................................58
+   10.2.2   201 Created ..............................................59
+   10.2.3   202 Accepted .............................................59
+   10.2.4   203 Non-Authoritative Information ........................59
+   10.2.5   204 No Content ...........................................60
+   10.2.6   205 Reset Content ........................................60
+   10.2.7   206 Partial Content ......................................60
+   10.3  Redirection 3xx .............................................61
+   10.3.1   300 Multiple Choices .....................................61
+   10.3.2   301 Moved Permanently ....................................62
+   10.3.3   302 Found ................................................62
+   10.3.4   303 See Other ............................................63
+   10.3.5   304 Not Modified .........................................63
+   10.3.6   305 Use Proxy ............................................64
+   10.3.7   306 (Unused) .............................................64
+
+
+
+Fielding, et al.            Standards Track                     [Page 3]
+
+RFC 2616                        HTTP/1.1                       June 1999
+
+
+   10.3.8   307 Temporary Redirect ...................................65
+   10.4  Client Error 4xx ............................................65
+   10.4.1    400 Bad Request .........................................65
+   10.4.2    401 Unauthorized ........................................66
+   10.4.3    402 Payment Required ....................................66
+   10.4.4    403 Forbidden ...........................................66
+   10.4.5    404 Not Found ...........................................66
+   10.4.6    405 Method Not Allowed ..................................66
+   10.4.7    406 Not Acceptable ......................................67
+   10.4.8    407 Proxy Authentication Required .......................67
+   10.4.9    408 Request Timeout .....................................67
+   10.4.10   409 Conflict ............................................67
+   10.4.11   410 Gone ................................................68
+   10.4.12   411 Length Required .....................................68
+   10.4.13   412 Precondition Failed .................................68
+   10.4.14   413 Request Entity Too Large ............................69
+   10.4.15   414 Request-URI Too Long ................................69
+   10.4.16   415 Unsupported Media Type ..............................69
+   10.4.17   416 Requested Range Not Satisfiable .....................69
+   10.4.18   417 Expectation Failed ..................................70
+   10.5  Server Error 5xx ............................................70
+   10.5.1   500 Internal Server Error ................................70
+   10.5.2   501 Not Implemented ......................................70
+   10.5.3   502 Bad Gateway ..........................................70
+   10.5.4   503 Service Unavailable ..................................70
+   10.5.5   504 Gateway Timeout ......................................71
+   10.5.6   505 HTTP Version Not Supported ...........................71
+   11   Access Authentication ........................................71
+   12   Content Negotiation ..........................................71
+   12.1  Server-driven Negotiation ...................................72
+   12.2  Agent-driven Negotiation ....................................73
+   12.3  Transparent Negotiation .....................................74
+   13   Caching in HTTP ..............................................74
+   13.1.1   Cache Correctness ........................................75
+   13.1.2   Warnings .................................................76
+   13.1.3   Cache-control Mechanisms .................................77
+   13.1.4   Explicit User Agent Warnings .............................78
+   13.1.5   Exceptions to the Rules and Warnings .....................78
+   13.1.6   Client-controlled Behavior ...............................79
+   13.2  Expiration Model ............................................79
+   13.2.1   Server-Specified Expiration ..............................79
+   13.2.2   Heuristic Expiration .....................................80
+   13.2.3   Age Calculations .........................................80
+   13.2.4   Expiration Calculations ..................................83
+   13.2.5   Disambiguating Expiration Values .........................84
+   13.2.6   Disambiguating Multiple Responses ........................84
+   13.3  Validation Model ............................................85
+   13.3.1   Last-Modified Dates ......................................86
+
+
+
+Fielding, et al.            Standards Track                     [Page 4]
+
+RFC 2616                        HTTP/1.1                       June 1999
+
+
+   13.3.2   Entity Tag Cache Validators ..............................86
+   13.3.3   Weak and Strong Validators ...............................86
+   13.3.4   Rules for When to Use Entity Tags and Last-Modified Dates.89
+   13.3.5   Non-validating Conditionals ..............................90
+   13.4  Response Cacheability .......................................91
+   13.5  Constructing Responses From Caches ..........................92
+   13.5.1   End-to-end and Hop-by-hop Headers ........................92
+   13.5.2   Non-modifiable Headers ...................................92
+   13.5.3   Combining Headers ........................................94
+   13.5.4   Combining Byte Ranges ....................................95
+   13.6  Caching Negotiated Responses ................................95
+   13.7  Shared and Non-Shared Caches ................................96
+   13.8  Errors or Incomplete Response Cache Behavior ................97
+   13.9  Side Effects of GET and HEAD ................................97
+   13.10   Invalidation After Updates or Deletions ...................97
+   13.11   Write-Through Mandatory ...................................98
+   13.12   Cache Replacement .........................................99
+   13.13   History Lists .............................................99
+   14   Header Field Definitions ....................................100
+   14.1  Accept .....................................................100
+   14.2  Accept-Charset .............................................102
+   14.3  Accept-Encoding ............................................102
+   14.4  Accept-Language ............................................104
+   14.5  Accept-Ranges ..............................................105
+   14.6  Age ........................................................106
+   14.7  Allow ......................................................106
+   14.8  Authorization ..............................................107
+   14.9  Cache-Control ..............................................108
+   14.9.1   What is Cacheable .......................................109
+   14.9.2   What May be Stored by Caches ............................110
+   14.9.3   Modifications of the Basic Expiration Mechanism .........111
+   14.9.4   Cache Revalidation and Reload Controls ..................113
+   14.9.5   No-Transform Directive ..................................115
+   14.9.6   Cache Control Extensions ................................116
+   14.10   Connection ...............................................117
+   14.11   Content-Encoding .........................................118
+   14.12   Content-Language .........................................118
+   14.13   Content-Length ...........................................119
+   14.14   Content-Location .........................................120
+   14.15   Content-MD5 ..............................................121
+   14.16   Content-Range ............................................122
+   14.17   Content-Type .............................................124
+   14.18   Date .....................................................124
+   14.18.1   Clockless Origin Server Operation ......................125
+   14.19   ETag .....................................................126
+   14.20   Expect ...................................................126
+   14.21   Expires ..................................................127
+   14.22   From .....................................................128
+
+
+
+Fielding, et al.            Standards Track                     [Page 5]
+
+RFC 2616                        HTTP/1.1                       June 1999
+
+
+   14.23   Host .....................................................128
+   14.24   If-Match .................................................129
+   14.25   If-Modified-Since ........................................130
+   14.26   If-None-Match ............................................132
+   14.27   If-Range .................................................133
+   14.28   If-Unmodified-Since ......................................134
+   14.29   Last-Modified ............................................134
+   14.30   Location .................................................135
+   14.31   Max-Forwards .............................................136
+   14.32   Pragma ...................................................136
+   14.33   Proxy-Authenticate .......................................137
+   14.34   Proxy-Authorization ......................................137
+   14.35   Range ....................................................138
+   14.35.1    Byte Ranges ...........................................138
+   14.35.2    Range Retrieval Requests ..............................139
+   14.36   Referer ..................................................140
+   14.37   Retry-After ..............................................141
+   14.38   Server ...................................................141
+   14.39   TE .......................................................142
+   14.40   Trailer ..................................................143
+   14.41  Transfer-Encoding..........................................143
+   14.42   Upgrade ..................................................144
+   14.43   User-Agent ...............................................145
+   14.44   Vary .....................................................145
+   14.45   Via ......................................................146
+   14.46   Warning ..................................................148
+   14.47   WWW-Authenticate .........................................150
+   15 Security Considerations .......................................150
+   15.1      Personal Information....................................151
+   15.1.1   Abuse of Server Log Information .........................151
+   15.1.2   Transfer of Sensitive Information .......................151
+   15.1.3   Encoding Sensitive Information in URI's .................152
+   15.1.4   Privacy Issues Connected to Accept Headers ..............152
+   15.2  Attacks Based On File and Path Names .......................153
+   15.3  DNS Spoofing ...............................................154
+   15.4  Location Headers and Spoofing ..............................154
+   15.5  Content-Disposition Issues .................................154
+   15.6  Authentication Credentials and Idle Clients ................155
+   15.7  Proxies and Caching ........................................155
+   15.7.1    Denial of Service Attacks on Proxies....................156
+   16   Acknowledgments .............................................156
+   17   References ..................................................158
+   18   Authors' Addresses ..........................................162
+   19   Appendices ..................................................164
+   19.1  Internet Media Type message/http and application/http ......164
+   19.2  Internet Media Type multipart/byteranges ...................165
+   19.3  Tolerant Applications ......................................166
+   19.4  Differences Between HTTP Entities and RFC 2045 Entities ....167
+
+
+
+Fielding, et al.            Standards Track                     [Page 6]
+
+RFC 2616                        HTTP/1.1                       June 1999
+
+
+   19.4.1   MIME-Version ............................................167
+   19.4.2   Conversion to Canonical Form ............................167
+   19.4.3   Conversion of Date Formats ..............................168
+   19.4.4   Introduction of Content-Encoding ........................168
+   19.4.5   No Content-Transfer-Encoding ............................168
+   19.4.6   Introduction of Transfer-Encoding .......................169
+   19.4.7   MHTML and Line Length Limitations .......................169
+   19.5  Additional Features ........................................169
+   19.5.1   Content-Disposition .....................................170
+   19.6  Compatibility with Previous Versions .......................170
+   19.6.1   Changes from HTTP/1.0 ...................................171
+   19.6.2   Compatibility with HTTP/1.0 Persistent Connections ......172
+   19.6.3   Changes from RFC 2068 ...................................172
+   20   Index .......................................................175
+   21   Full Copyright Statement ....................................176
+
+1 Introduction
+
+1.1 Purpose
+
+   The Hypertext Transfer Protocol (HTTP) is an application-level
+   protocol for distributed, collaborative, hypermedia information
+   systems. HTTP has been in use by the World-Wide Web global
+   information initiative since 1990. The first version of HTTP,
+   referred to as HTTP/0.9, was a simple protocol for raw data transfer
+   across the Internet. HTTP/1.0, as defined by RFC 1945 [6], improved
+   the protocol by allowing messages to be in the format of MIME-like
+   messages, containing metainformation about the data transferred and
+   modifiers on the request/response semantics. However, HTTP/1.0 does
+   not sufficiently take into consideration the effects of hierarchical
+   proxies, caching, the need for persistent connections, or virtual
+   hosts. In addition, the proliferation of incompletely-implemented
+   applications calling themselves "HTTP/1.0" has necessitated a
+   protocol version change in order for two communicating applications
+   to determine each other's true capabilities.
+
+   This specification defines the protocol referred to as "HTTP/1.1".
+   This protocol includes more stringent requirements than HTTP/1.0 in
+   order to ensure reliable implementation of its features.
+
+   Practical information systems require more functionality than simple
+   retrieval, including search, front-end update, and annotation. HTTP
+   allows an open-ended set of methods and headers that indicate the
+   purpose of a request [47]. It builds on the discipline of reference
+   provided by the Uniform Resource Identifier (URI) [3], as a location
+   (URL) [4] or name (URN) [20], for indicating the resource to which a
+
+
+
+
+
+Fielding, et al.            Standards Track                     [Page 7]
+
+RFC 2616                        HTTP/1.1                       June 1999
+
+
+   method is to be applied. Messages are passed in a format similar to
+   that used by Internet mail [9] as defined by the Multipurpose
+   Internet Mail Extensions (MIME) [7].
+
+   HTTP is also used as a generic protocol for communication between
+   user agents and proxies/gateways to other Internet systems, including
+   those supported by the SMTP [16], NNTP [13], FTP [18], Gopher [2],
+   and WAIS [10] protocols. In this way, HTTP allows basic hypermedia
+   access to resources available from diverse applications.
+
+1.2 Requirements
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in RFC 2119 [34].
+
+   An implementation is not compliant if it fails to satisfy one or more
+   of the MUST or REQUIRED level requirements for the protocols it
+   implements. An implementation that satisfies all the MUST or REQUIRED
+   level and all the SHOULD level requirements for its protocols is said
+   to be "unconditionally compliant"; one that satisfies all the MUST
+   level requirements but not all the SHOULD level requirements for its
+   protocols is said to be "conditionally compliant."
+
+1.3 Terminology
+
+   This specification uses a number of terms to refer to the roles
+   played by participants in, and objects of, the HTTP communication.
+
+   connection
+      A transport layer virtual circuit established between two programs
+      for the purpose of communication.
+
+   message
+      The basic unit of HTTP communication, consisting of a structured
+      sequence of octets matching the syntax defined in section 4 and
+      transmitted via the connection.
+
+   request
+      An HTTP request message, as defined in section 5.
+
+   response
+      An HTTP response message, as defined in section 6.
+
+
+
+
+
+
+
+
+Fielding, et al.            Standards Track                     [Page 8]
+
+RFC 2616                        HTTP/1.1                       June 1999
+
+
+   resource
+      A network data object or service that can be identified by a URI,
+      as defined in section 3.2. Resources may be available in multiple
+      representations (e.g. multiple languages, data formats, size, and
+      resolutions) or vary in other ways.
+
+   entity
+      The information transferred as the payload of a request or
+      response. An entity consists of metainformation in the form of
+      entity-header fields and content in the form of an entity-body, as
+      described in section 7.
+
+   representation
+      An entity included with a response that is subject to content
+      negotiation, as described in section 12. There may exist multiple
+      representations associated with a particular response status.
+
+   content negotiation
+      The mechanism for selecting the appropriate representation when
+      servicing a request, as described in section 12. The
+      representation of entities in any response can be negotiated
+      (including error responses).
+
+   variant
+      A resource may have one, or more than one, representation(s)
+      associated with it at any given instant. Each of these
+      representations is termed a `varriant'.  Use of the term `variant'
+      does not necessarily imply that the resource is subject to content
+      negotiation.
+
+   client
+      A program that establishes connections for the purpose of sending
+      requests.
+
+   user agent
+      The client which initiates a request. These are often browsers,
+      editors, spiders (web-traversing robots), or other end user tools.
+
+   server
+      An application program that accepts connections in order to
+      service requests by sending back responses. Any given program may
+      be capable of being both a client and a server; our use of these
+      terms refers only to the role being performed by the program for a
+      particular connection, rather than to the program's capabilities
+      in general. Likewise, any server may act as an origin server,
+      proxy, gateway, or tunnel, switching behavior based on the nature
+      of each request.
+
+
+
+
+Fielding, et al.            Standards Track                     [Page 9]
+
+RFC 2616                        HTTP/1.1                       June 1999
+
+
+   origin server
+      The server on which a given resource resides or is to be created.
+
+   proxy
+      An intermediary program which acts as both a server and a client
+      for the purpose of making requests on behalf of other clients.
+      Requests are serviced internally or by passing them on, with
+      possible translation, to other servers. A proxy MUST implement
+      both the client and server requirements of this specification. A
+      "transparent proxy" is a proxy that does not modify the request or
+      response beyond what is required for proxy authentication and
+      identification. A "non-transparent proxy" is a proxy that modifies
+      the request or response in order to provide some added service to
+      the user agent, such as group annotation services, media type
+      transformation, protocol reduction, or anonymity filtering. Except
+      where either transparent or non-transparent behavior is explicitly
+      stated, the HTTP proxy requirements apply to both types of
+      proxies.
+
+   gateway
+      A server which acts as an intermediary for some other server.
+      Unlike a proxy, a gateway receives requests as if it were the
+      origin server for the requested resource; the requesting client
+      may not be aware that it is communicating with a gateway.
+
+   tunnel
+      An intermediary program which is acting as a blind relay between
+      two connections. Once active, a tunnel is not considered a party
+      to the HTTP communication, though the tunnel may have been
+      initiated by an HTTP request. The tunnel ceases to exist when both
+      ends of the relayed connections are closed.
+
+   cache
+      A program's local store of response messages and the subsystem
+      that controls its message storage, retrieval, and deletion. A
+      cache stores cacheable responses in order to reduce the response
+      time and network bandwidth consumption on future, equivalent
+      requests. Any client or server may include a cache, though a cache
+      cannot be used by a server that is acting as a tunnel.
+
+   cacheable
+      A response is cacheable if a cache is allowed to store a copy of
+      the response message for 
+
+
+
+
+
+
+
+Network Working Group                                          T. Dierks
+Request for Comments: 5246                                   Independent
+Obsoletes: 3268, 4346, 4366                                  E. Rescorla
+Updates: 4492                                                 RTFM, Inc.
+Category: Standards Track                                    August 2008
+
+
+              The Transport Layer Security (TLS) Protocol
+                              Version 1.2
+
+Status of This Memo
+
+   This document specifies an Internet standards track protocol for the
+   Internet community, and requests discussion and suggestions for
+   improvements.  Please refer to the current edition of the "Internet
+   Official Protocol Standards" (STD 1) for the standardization state
+   and status of this protocol.  Distribution of this memo is unlimited.
+
+Abstract
+
+   This document specifies Version 1.2 of the Transport Layer Security
+   (TLS) protocol.  The TLS protocol provides communications security
+   over the Internet.  The protocol allows client/server applications to
+   communicate in a way that is designed to prevent eavesdropping,
+   tampering, or message forgery.
+
+Table of Contents
+
+   1. Introduction ....................................................4
+      1.1. Requirements Terminology ...................................5
+      1.2. Major Differences from TLS 1.1 .............................5
+   2. Goals ...........................................................6
+   3. Goals of This Document ..........................................7
+   4. Presentation Language ...........................................7
+      4.1. Basic Block Size ...........................................7
+      4.2. Miscellaneous ..............................................8
+      4.3. Vectors ....................................................8
+      4.4. Numbers ....................................................9
+      4.5. Enumerateds ................................................9
+      4.6. Constructed Types .........................................10
+           4.6.1. Variants ...........................................10
+      4.7. Cryptographic Attributes ..................................12
+      4.8. Constants .................................................14
+   5. HMAC and the Pseudorandom Function .............................14
+   6. The TLS Record Protocol ........................................15
+      6.1. Connection States .........................................16
+      6.2. Record Layer ..............................................19
+           6.2.1. Fragmentation ......................................19
+
+
+
+Dierks & Rescorla           Standards Track                     [Page 1]
+
+RFC 5246                          TLS                        August 2008
+
+
+           6.2.2. Record Compression and Decompression ...............20
+           6.2.3. Record Payload Protection ..........................21
+                  6.2.3.1. Null or Standard Stream Cipher ............22
+                  6.2.3.2. CBC Block Cipher ..........................22
+                  6.2.3.3. AEAD Ciphers ..............................24
+      6.3. Key Calculation ...........................................25
+   7. The TLS Handshaking Protocols ..................................26
+      7.1. Change Cipher Spec Protocol ...............................27
+      7.2. Alert Protocol ............................................28
+           7.2.1. Closure Alerts .....................................29
+           7.2.2. Error Alerts .......................................30
+      7.3. Handshake Protocol Overview ...............................33
+      7.4. Handshake Protocol ........................................37
+           7.4.1. Hello Messages .....................................38
+                  7.4.1.1. Hello Request .............................38
+                  7.4.1.2. Client Hello ..............................39
+                  7.4.1.3. Server Hello ..............................42
+                  7.4.1.4. Hello Extensions ..........................44
+                           7.4.1.4.1. Signature Algorithms ...........45
+           7.4.2. Server Certificate .................................47
+           7.4.3. Server Key Exchange Message ........................50
+           7.4.4. Certificate Request ................................53
+           7.4.5. Server Hello Done ..................................55
+           7.4.6. Client Certificate .................................55
+           7.4.7. Client Key Exchange Message ........................57
+                  7.4.7.1. RSA-Encrypted Premaster Secret Message ....58
+                  7.4.7.2. Client Diffie-Hellman Public Value ........61
+           7.4.8. Certificate Verify .................................62
+           7.4.9. Finished ...........................................63
+   8. Cryptographic Computations .....................................64
+      8.1. Computing the Master Secret ...............................64
+           8.1.1. RSA ................................................65
+           8.1.2. Diffie-Hellman .....................................65
+   9. Mandatory Cipher Suites ........................................65
+   10. Application Data Protocol .....................................65
+   11. Security Considerations .......................................65
+   12. IANA Considerations ...........................................65
+   Appendix A. Protocol Data Structures and Constant Values ..........68
+      A.1. Record Layer ..............................................68
+      A.2. Change Cipher Specs Message ...............................69
+      A.3. Alert Messages ............................................69
+      A.4. Handshake Protocol ........................................70
+           A.4.1. Hello Messages .....................................71
+           A.4.2. Server Authentication and Key Exchange Messages ....72
+           A.4.3. Client Authentication and Key Exchange Messages ....74
+           A.4.4. Handshake Finalization Message .....................74
+      A.5. The Cipher Suite ..........................................75
+      A.6. The Security Parameters ...................................77
+
+
+
+Dierks & Rescorla           Standards Track                     [Page 2]
+
+RFC 5246                          TLS                        August 2008
+
+
+      A.7. Changes to RFC 4492 .......................................78
+   Appendix B. Glossary ..............................................78
+   Appendix C. Cipher Suite Definitions ..............................83
+   Appendix D. Implementation Notes ..................................85
+      D.1. Random Number Generation and Seeding ......................85
+      D.2. Certificates and Authentication ...........................85
+      D.3. Cipher Suites .............................................85
+      D.4. Implementation Pitfalls ...................................85
+   Appendix E. Backward Compatibility ................................87
+      E.1. Compatibility with TLS 1.0/1.1 and SSL 3.0 ................87
+      E.2. Compatibility with SSL 2.0 ................................88
+      E.3. Avoiding Man-in-the-Middle Version Rollback ...............90
+   Appendix F. Security Analysis .....................................91
+      F.1. Handshake Protocol ........................................91
+           F.1.1. Authentication and Key Exchange ....................91
+                  F.1.1.1. Anonymous Key Exchange ....................91
+                  F.1.1.2. RSA Key Exchange and Authentication .......92
+                  F.1.1.3. Diffie-Hellman Key Exchange with
+                           Authentication ............................92
+           F.1.2. Version Rollback Attacks ...........................93
+           F.1.3. Detecting Attacks Against the Handshake Protocol ...94
+           F.1.4. Resuming Sessions ..................................94
+      F.2. Protecting Application Data ...............................94
+      F.3. Explicit IVs ..............................................95
+      F.4. Security of Composite Cipher Modes ........................95
+      F.5. Denial of Service .........................................96
+      F.6. Final Notes ...............................................96
+   Normative References ..............................................97
+   Informative References ............................................98
+   Working Group Information ........................................101
+   Contributors .....................................................101
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Dierks & Rescorla           Standards Track                     [Page 3]
+
+RFC 5246                          TLS                        August 2008
+
+
+1.  Introduction
+
+   The primary goal of the TLS protocol is to provide privacy and data
+   integrity between two communicating applications.  The protocol is
+   composed of two layers: the TLS Record Protocol and the TLS Handshake
+   Protocol.  At the lowest level, layered on top of some reliable
+   transport protocol (e.g., TCP [TCP]), is the TLS Record Protocol.
+   The TLS Record Protocol provides connection security that has two
+   basic properties:
+
+   -  The connection is private.  Symmetric cryptography is used for
+      data encryption (e.g., AES [AES], RC4 [SCH], etc.).  The keys for
+      this symmetric encryption are generated uniquely for each
+      connection and are based on a secret negotiated by another
+      protocol (such as the TLS Handshake Protocol).  The Record
+      Protocol can also be used without encryption.
+
+   -  The connection is reliable.  Message transport includes a message
+      integrity check using a keyed MAC.  Secure hash functions (e.g.,
+      SHA-1, etc.) are used for MAC computations.  The Record Protocol
+      can operate without a MAC, but is generally only used in this mode
+      while another protocol is using the Record Protocol as a transport
+      for negotiating security parameters.
+
+   The TLS Record Protocol is used for encapsulation of various higher-
+   level protocols.  One such encapsulated protocol, the TLS Handshake
+   Protocol, allows the server and client to authenticate each other and
+   to negotiate an encryption algorithm and cryptographic keys before
+   the application protocol transmits or receives its first byte of
+   data.  The TLS Handshake Protocol provides connection security that
+   has three basic properties:
+
+   -  The peer's identity can be authenticated using asymmetric, or
+      public key, cryptography (e.g., RSA [RSA], DSA [DSS], etc.).  This
+      authentication can be made optional, but is generally required for
+      at least one of the peers.
+
+   -  The negotiation of a shared secret is secure: the negotiated
+      secret is unavailable to eavesdroppers, and for any authenticated
+      connection the secret cannot be obtained, even by an attacker who
+      can place himself in the middle of the connection.
+
+   -  The negotiation is reliable: no attacker can modify the
+      negotiation communication without being detected by the parties to
+      the communication.
+
+
+
+
+
+
+Dierks & Rescorla           Standards Track                     [Page 4]
+
+RFC 5246                          TLS                        August 2008
+
+
+   One advantage of TLS is that it is application protocol independent.
+   Higher-level protocols can layer on top of the TLS protocol
+   transparently.  The TLS standard, however, does not specify how
+   protocols add security with TLS; the decisions on how to initiate TLS
+   handshaking and how to interpret the authentication certificates
+   exchanged are left to the judgment of the designers and implementors
+   of protocols that run on top of TLS.
+
+1.1.  Requirements Terminology
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in RFC 2119 [REQ].
+
+1.2.  Major Differences from TLS 1.1
+
+   This document is a revision of the TLS 1.1 [TLS1.1] protocol which
+   contains improved flexibility, particularly for negotiation of
+   cryptographic algorithms.  The major changes are:
+
+   -  The MD5/SHA-1 combination in the pseudorandom function (PRF) has
+      been replaced with cipher-suite-specified PRFs.  All cipher suites
+      in this document use P_SHA256.
+
+   -  The MD5/SHA-1 combination in the digitally-signed element has been
+      replaced with a single hash.  Signed elements now include a field
+      that explicitly specifies the hash algorithm used.
+
+   -  Substantial cleanup to the client's and server's ability to
+      specify which hash and signature algorithms they will accept.
+      Note that this also relaxes some of the constraints on signature
+      and hash algorithms from previous versions of TLS.
+
+   -  Addition of support for authenticated encryption with additional
+      data modes.
+
+   -  TLS Extensions definition and AES Cipher Suites were merged in
+      from external [TLSEXT] and [TLSAES].
+
+   -  Tighter checking of EncryptedPreMasterSecret version numbers.
+
+   -  Tightened up a number of requirements.
+
+   -  Verify_data length now depends on the cipher suite (default is
+      still 12).
+
+   -  Cleaned up description of Bleichenbacher/Klima attack defenses.
+
+
+
+
+Dierks & Rescorla           Standards Track                     [Page 5]
+
+RFC 5246                          TLS                        August 2008
+
+
+   -  Alerts MUST now be sent in many cases.
+
+   -  After a certificate_request, if no certificates are available,
+      clients now MUST send an empty certificate list.
+
+   -  TLS_RSA_WITH_AES_128_CBC_SHA is now the mandatory to implement
+      cipher suite.
+
+   -  Added HMAC-SHA256 cipher suites.
+
+   -  Removed IDEA and DES cipher suites.  They are now deprecated and
+      will be documented in a separate document.
+
+   -  Support for the SSLv2 backward-compatible hello is now a MAY, not
+      a SHOULD, with sending it a SHOULD NOT.  Support will probably
+      become a SHOULD NOT in the future.
+
+   -  Added limited "fall-through" to the presentation language to allow
+      multiple case arms to have the same encoding.
+
+   -  Added an Implementation Pitfalls sections
+
+   -  The usual clarifications and editorial work.
+
+2.  Goals
+
+   The goals of the TLS protocol, in order of priority, are as follows:
+
+   1. Cryptographic security: TLS should be used to establish a secure
+      connection between two parties.
+
+   2. Interoperability: Independent programmers should be able to
+      develop applications utilizing TLS that can successfully exchange
+      cryptographic parameters without knowledge of one another's code.
+
+   3. Extensibility: TLS seeks to provide a framework into which new
+      public key and bulk encryption methods can be incorporated as
+      necessary.  This will also accomplish two sub-goals: preventing
+      the need to create a new protocol (and risking the introduction of
+      possible new weaknesses) and avoiding the need to implement an
+      entire new security library.
+
+   4. Relative efficiency: Cryptographic operations tend to be highly
+      CPU intensive, particularly public key operations.  For this
+      reason, the TLS protocol has incorporated an optional session
+      caching scheme to reduce the number of connections that need to be
+      established from scratch.  Additionally, care has been taken to
+      reduce network activity.
+
+
+
+Dierks & Rescorla           Standards Track                     [Page 6]
+
+RFC 5246                          TLS                        August 2008
+
+
+3.  Goals of This Document
+
+   This document and the TLS protocol itself are based on the SSL 3.0
+   Protocol Specification as published by Netscape.  The differences
+   between this protocol and SSL 3.0 are not dramatic, but they are
+   significant enough that the various versions of TLS and SSL 3.0 do
+   not interoperate (although each protocol incorporates a mechanism by
+   which an implementation can back down to prior versions).  This
+   document is intended primarily for readers who will be implementing
+   the protocol and for those doing cryptographic analysis of it.  The
+   specification has been written with this in mind, and it is intended
+   to reflect the needs of those two groups.  For that reason, many of
+   the algorithm-dependent data structures and rules are included in the
+   body of the text (as opposed to in an appendix), providing easier
+   access to them.
+
+   This document is not intended to supply any details of service
+   definition or of interface definition, although it does cover select
+   areas of policy as they are required for the maintenance of solid
+   security.
+
+4.  Presentation Language
+
+   This document deals with the formatting of data in an external
+   representation.  The following very basic and somewhat casually
+   defined presentation syntax will be used.  The syntax draws from
+   several sources in its structure.  Although it resembles the
+   programming language "C" in its syntax and XDR [XDR] in both its
+   syntax and intent, it would be risky to draw too many parallels.  The
+   purpose of this presentation language is to document TLS only; it has
+   no general application beyond that particular goal.
+
+4.1.  Basic Block Size
+
+   The representation of all data items is explicitly specified.  The
+   basic data block size is one byte (i.e., 8 bits).  Multiple byte data
+   items are concatenations of bytes, from left to right, from top to
+   bottom.  From the byte stream, a multi-byte item (a numeric in the
+   example) is formed (using C notation) by:
+
+      value = (byte[0] << 8*(n-1)) | (byte[1] << 8*(n-2)) |
+              ... | byte[n-1];
+
+   This byte ordering for multi-byte values is the commonplace network
+   byte order or big-endian format.
+
+
+
+
+
+
+Dierks & Rescorla           Standards Track                     [Page 7]
+
+RFC 5246                          TLS                        August 2008
+
+
+4.2.  Miscellaneous
+
+   Comments begin with "/*" and end with "*/".
+
+   Optional components are denoted by enclosing them in "[[ ]]" double
+   brackets.
+
+   Single-byte entities containing uninterpreted data are of type
+   opaque.
+
+4.3.  Vectors
+
+   A vector (single-dimensioned array) is a stream of homogeneous data
+   elements.  The size of the vector may be specified at documentation
+   time or left unspecified until runtime.  In either case, the length
+   declares the number of bytes, not the number of elements, in the
+   vector.  The syntax for specifying a new type, T', that is a fixed-
+   length vector of type T is
+
+      T T'[n];
+
+   Here, T' occupies n bytes in the data stream, where n is a multiple
+   of the size of T.  The length of the vector is not included in the
+   encoded stream.
+
+   In the following example, Datum is defined to be three consecutive
+   bytes that the protocol does not interpret, while Data is three
+   consecutive Datum, consuming a total of nine bytes.
+
+      opaque Datum[3];      /* three uninterpreted bytes */
+      Datum Data[9];        /* 3 consecutive 3 byte vectors */
+
+   Variable-length vectors are defined by specifying a subrange of legal
+   lengths, inclusively, using the notation <floor..ceiling>.  When
+   these are encoded, the actual length precedes the vector's contents
+   in the byte stream.  The length will be in the form of a number
+   consuming as many bytes as required to hold the vector's specified
+   maximum (ceiling) length.  A variable-length vector with an actual
+   length field of zero is referred to as an empty vector.
+
+      T T'<floor..ceiling>;
+
+   In the following example, mandatory is a vector that must contain
+   between 300 and 400 bytes of type opaque.  It can never be empty.
+   The actual length field consumes two bytes, a uint16, which is
+   sufficient to represent the value 400 (see Section 4.4).  On the
+   other hand, longer can represent up to 800 bytes of data, or 400
+   uint16 elements, and it may be empty.  Its encoding will include a
+
+
+
+Dierks & Rescorla           Standards Track                     [Page 8]
+
+RFC 5246                          TLS                        August 2008
+
+
+   two-byte actual length field prepended to the vector.  The length of
+   an encoded vector must be an even multiple of the length of a single
+   element (for example, a 17-byte vector of uint16 would be illegal).
+
+      opaque mandatory<300..400>;
+            /* length field is 2 bytes, cannot be empty */
+      uint16 longer<0..800>;
+            /* zero to 400 16-bit unsigned integers */
+
+4.4.  Numbers
+
+   The basic numeric data type is an unsigned byte (uint8).  All larger
+   numeric data types are formed from fixed-length series of bytes
+   concatenated as described in Section 4.1 and are also unsigned.  The
+   following numeric types are predefined.
+
+      uint8 uint16[2];
+      uint8 uint24[3];
+      uint8 uint32[4];
+      uint8 uint64[8];
+
+   All values, here and elsewhere in the specification, are stored in
+   network byte (big-endian) order; the uint32 represented by the hex
+   bytes 01 02 03 04 is equivalent to the decimal value 16909060.
+
+   Note that in some cases (e.g., DH parameters) it is necessary to
+   represent integers as opaque vectors.  In such cases, they are
+   represented as unsigned integers (i.e., leading zero octets are not
+   required even if the most significant bit is set).
+
+4.5.  Enumerateds
+
+   An additional sparse data type is available called enum.  A field of
+   type enum can only assume the values declared in the definition.
+   Each definition is a different type.  Only enumerateds of the same
+   type may be assigned or compared.  Every element of an enumerated
+   must be assigned a value, as demonstrated in the following example.
+   Since the elements of the enumerated are not ordered, they can be
+   assigned any unique value, in any order.
+
+      enum { e1(v1), e2(v2), ... , en(vn) [[, (n)]] } Te;
+
+   An enumerated occupies as much space in the byte stream as would its
+   maximal defined ordinal value.  The following definition would cause
+   one byte to be used to carry fields of type Color.
+
+      enum { red(3), blue(5), white(7) } Color;
+
+
+
+
+Dierks & Rescorla           Standards Track                     [Page 9]
+
+RFC 5246                          TLS                        August 2008
+
+
+   One may optionally specify a value without its associated tag to
+   force the width definition without defining a superfluous element.
+
+   In the following example, Taste will consume two bytes in the data
+   stream but can only assume the values 1, 2, or 4.
+
+      enum { sweet(1), sour(2), bitter(4), (32000) } Taste;
+
+   The names of the elements of an enumeration are scoped within the
+   defined type.  In the first example, a fully qualified reference to
+   the second element of the enumeration would be Color.blue.  Such
+   qualification is not required if the target of the assignment is well
+   specified.
+
+      Color color = Color.blue;     /* overspecified, legal */
+      Color color = blue;           /* correct, type implicit */
+
+   For enumerateds that are never converted to external representation,
+   the numerical information may be omitted.
+
+      enum { low, medium, high } Amount;
+
+4.6.  Constructed Types
+
+   Structure types may be constructed from primitive types for
+   convenience.  Each specification declares a new, unique type.  The
+   syntax for definition is much like that of C.
+
+      struct {
+          T1 f1;
+          T2 f2;
+          ...
+          Tn fn;
+      } [[T]];
+
+   The fields within a structure may be qualified using the type's name,
+   with a syntax much like that available for enumerateds.  For example,
+   T.f2 refers to the second field of the previous declaration.
+   Structure definitions may be embedded.
+
+4.6.1.  Variants
+
+   Defined structures may have variants based on some knowledge that is
+   available within the environment.  The selector must be an enumerated
+   type that defines the possible variants the structure defines.  There
+   must be a case arm for every element of the enumeration declared in
+   the select.  Case arms have limited fall-through: if two case arms
+   follow in immediate succession with no fields in between, then they
+
+
+
+Dierks & Rescorla           Standards Track                    [Page 10]
+
+RFC 5246                          TLS                        August 2008
+
+
+   both contain the same fields.  Thus, in the example below, "orange"
+   and "banana" both contain V2.  Note that this is a new piece of
+   syntax in TLS 1.2.
+
+   The body of the variant structure may be given a label for reference.
+   The mechanism by which the variant is selected at runtime is not
+   prescribed by the presentation language.
+
+      struct {
+          T1 f1;
+          T2 f2;
+          ....
+          Tn fn;
+           select (E) {
+               case e1: Te1;
+               case e2: Te2;
+               case e3: case e4: Te3;
+               ....
+               case en: Ten;
+           } [[fv]];
+      } [[Tv]];
+
+   For example:
+
+      enum { apple, orange, banana } VariantTag;
+
+      struct {
+          uint16 number;
+          opaque string<0..10>; /* variable length */
+      } V1;
+
+      struct {
+          uint32 number;
+          opaque string[10];    /* fixed length */
+      } V2;
+
+      struct {
+          select (VariantTag) { /* value of selector is implicit */
+              case apple:
+                V1;   /* VariantBody, tag = apple */
+              case orange:
+              case banana:
+                V2;   /* VariantBody, tag = orange or banana */
+          } variant_body;       /* optional label on variant */
+      } VariantRecord;
+
+
+
+
+
+
+Dierks & Rescorla           Standards Track                    [Page 11]
+
+RFC 5246                          TLS                        August 2008
+
+
+4.7.  Cryptographic Attributes
+
+   The five cryptographic operations -- digital signing, stream cipher
+   encryption, block cipher encryption, authenticated encryption with
+   additional data (AEAD) encryption, and public key encryption -- are
+   designated digitally-signed, stream-ciphered, block-ciphered, aead-
+   ciphered, and public-key-encrypted, respectively.  A field's
+   cryptographic processing is specified by prepending an appropriate
+   key word designation before the field's type specification.
+   Cryptographic keys are implied by the current session state (see
+   Section 6.1).
+
+   A digitally-signed element is encoded as a struct DigitallySigned:
+
+      struct {
+         SignatureAndHashAlgorithm algorithm;
+         opaque signature<0..2^16-1>;
+      } DigitallySigned;
+
+   The algorithm field specifies the algorithm used (see Section
+   7.4.1.4.1 for the definition of this field).  Note that the
+   introduction of the algorithm field is a change from previous
+   versions.  The signature is a digital signature using those
+   algorithms over the contents of the element.  The contents themselves
+   do not appear on the wire but are simply calculated.  The length of
+   the signature is specified by the signing algorithm and key.
+
+   In RSA signing, the opaque vector contains the signature generated
+   using the RSASSA-PKCS1-v1_5 signature scheme defined in [PKCS1].  As
+   discussed in [PKCS1], the DigestInfo MUST be DER-encoded [X680]
+   [X690].  For hash algorithms without parameters (which includes
+   SHA-1), the DigestInfo.AlgorithmIdentifier.parameters field MUST be
+   NULL, but implementations MUST accept both without parameters and
+   with NULL parameters.  Note that earlier versions of TLS used a
+   different RSA signature scheme that did not include a DigestInfo
+   encoding.
+
+   In DSA, the 20 bytes of the SHA-1 hash are run directly through the
+   Digital Signing Algorithm with no additional hashing.  This produces
+   two values, r and s.  The DSA signature is an opaque vector, as
+   above, the contents of which are the DER encoding of:
+
+      Dss-Sig-Value ::= SEQUENCE {
+          r INTEGER,
+          s INTEGER
+      }
+
+
+
+
+
+Dierks & Rescorla           Standards Track                    [Page 12]
+
+RFC 5246                          TLS                        August 2008
+
+
+   Note: In current terminology, DSA refers to the Digital Signature
+   Algorithm and DSS refers to the NIST standard.  In the original SSL
+   and TLS specs, "DSS" was used universally.  This document uses "DSA"
+   to refer to the algorithm, "DSS" to refer to the standard, and it
+   uses "DSS" in the code point definitions for historical continuity.
+
+   In stream cipher encryption, the plaintext is exclusive-ORed with an
+   identical amount of output generated from a cryptographically secure
+   keyed pseudorandom number generator.
+
+   In block cipher encryption, every block of plaintext encrypts to a
+   block of ciphertext.  All block cipher encryption is done in CBC
+   (Cipher Block Chaining) mode, and all items that are block-ciphered
+   will be an exact multiple of the cipher block length.
+
+   In AEAD encryption, the plaintext is simultaneously encrypted and
+   integrity protected.  The input may be of any length, and aead-
+   ciphered output is generally larger than the input in order to
+   accommodate the integrity check value.
+
+   In public key encryption, a public key algorithm is used to encrypt
+   data in such a way that it can be decrypted only with the matching
+   private key.  A public-key-encrypted element is encoded as an opaque
+   vector <0..2^16-1>, where the length is specified by the encryption
+   algorithm and key.
+
+   RSA encryption is done using the RSAES-PKCS1-v1_5 encryption scheme
+   defined in [PKCS1].
+
+   In the following example
+
+      stream-ciphered struct {
+          uint8 field1;
+          uint8 field2;
+          digitally-signed opaque {
+            uint8 field3<0..255>;
+          
+
+
+
+
+
+
+
+Internet Engineering Task Force (IETF)                       E. Rescorla
+Request for Comments: 8446                                       Mozilla
+Obsoletes: 5077, 5246, 6961                                  August 2018
+Updates: 5705, 6066
+Category: Standards Track
+ISSN: 2070-1721
+
+
+        The Transport Layer Security (TLS) Protocol Version 1.3
+
+Abstract
+
+   This document specifies version 1.3 of the Transport Layer Security
+   (TLS) protocol.  TLS allows client/server applications to communicate
+   over the Internet in a way that is designed to prevent eavesdropping,
+   tampering, and message forgery.
+
+   This document updates RFCs 5705 and 6066, and obsoletes RFCs 5077,
+   5246, and 6961.  This document also specifies new requirements for
+   TLS 1.2 implementations.
+
+Status of This Memo
+
+   This is an Internet Standards Track document.
+
+   This document is a product of the Internet Engineering Task Force
+   (IETF).  It represents the consensus of the IETF community.  It has
+   received public review and has been approved for publication by the
+   Internet Engineering Steering Group (IESG).  Further information on
+   Internet Standards is available in Section 2 of RFC 7841.
+
+   Information about the current status of this document, any errata,
+   and how to provide feedback on it may be obtained at
+   https://www.rfc-editor.org/info/rfc8446.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Rescorla                     Standards Track                    [Page 1]
+
+RFC 8446                           TLS                       August 2018
+
+
+Copyright Notice
+
+   Copyright (c) 2018 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (https://trustee.ietf.org/license-info) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+   This document may contain material from IETF Documents or IETF
+   Contributions published or made publicly available before November
+   10, 2008.  The person(s) controlling the copyright in some of this
+   material may not have granted the IETF Trust the right to allow
+   modifications of such material outside the IETF Standards Process.
+   Without obtaining an adequate license from the person(s) controlling
+   the copyright in such materials, this document may not be modified
+   outside the IETF Standards Process, and derivative works of it may
+   not be created outside the IETF Standards Process, except to format
+   it for publication as an RFC or to translate it into languages other
+   than English.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Rescorla                     Standards Track                    [Page 2]
+
+RFC 8446                           TLS                       August 2018
+
+
+Table of Contents
+
+   1. Introduction ....................................................6
+      1.1. Conventions and Terminology ................................7
+      1.2. Major Differences from TLS 1.2 .............................8
+      1.3. Updates Affecting TLS 1.2 ..................................9
+   2. Protocol Overview ..............................................10
+      2.1. Incorrect DHE Share .......................................14
+      2.2. Resumption and Pre-Shared Key (PSK) .......................15
+      2.3. 0-RTT Data ................................................17
+   3. Presentation Language ..........................................19
+      3.1. Basic Block Size ..........................................19
+      3.2. Miscellaneous .............................................20
+      3.3. Numbers ...................................................20
+      3.4. Vectors ...................................................20
+      3.5. Enumerateds ...............................................21
+      3.6. Constructed Types .........................................22
+      3.7. Constants .................................................23
+      3.8. Variants ..................................................23
+   4. Handshake Protocol .............................................24
+      4.1. Key Exchange Messages .....................................25
+           4.1.1. Cryptographic Negotiation ..........................26
+           4.1.2. Client Hello .......................................27
+           4.1.3. Server Hello .......................................31
+           4.1.4. Hello Retry Request ................................33
+      4.2. Extensions ................................................35
+           4.2.1. Supported Versions .................................39
+           4.2.2. Cookie .............................................40
+           4.2.3. Signature Algorithms ...............................41
+           4.2.4. Certificate Authorities ............................45
+           4.2.5. OID Filters ........................................45
+           4.2.6. Post-Handshake Client Authentication ...............47
+           4.2.7. Supported Groups ...................................47
+           4.2.8. Key Share ..........................................48
+           4.2.9. Pre-Shared Key Exchange Modes ......................51
+           4.2.10. Early Data Indication .............................52
+           4.2.11. Pre-Shared Key Extension ..........................55
+      4.3. Server Parameters .........................................59
+           4.3.1. Encrypted Extensions ...............................60
+           4.3.2. Certificate Request ................................60
+      4.4. Authentication Messages ...................................61
+           4.4.1. The Transcript Hash ................................63
+           4.4.2. Certificate ........................................64
+           4.4.3. Certificate Verify .................................69
+           4.4.4. Finished ...........................................71
+      4.5. End of Early Data .........................................72
+
+
+
+
+
+Rescorla                     Standards Track                    [Page 3]
+
+RFC 8446                           TLS                       August 2018
+
+
+      4.6. Post-Handshake Messages ...................................73
+           4.6.1. New Session Ticket Message .........................73
+           4.6.2. Post-Handshake Authentication ......................75
+           4.6.3. Key and Initialization Vector Update ...............76
+   5. Record Protocol ................................................77
+      5.1. Record Layer ..............................................78
+      5.2. Record Payload Protection .................................80
+      5.3. Per-Record Nonce ..........................................82
+      5.4. Record Padding ............................................83
+      5.5. Limits on Key Usage .......................................84
+   6. Alert Protocol .................................................85
+      6.1. Closure Alerts ............................................87
+      6.2. Error Alerts ..............................................88
+   7. Cryptographic Computations .....................................90
+      7.1. Key Schedule ..............................................91
+      7.2. Updating Traffic Secrets ..................................94
+      7.3. Traffic Key Calculation ...................................95
+      7.4. (EC)DHE Shared Secret Calculation .........................95
+           7.4.1. Finite Field Diffie-Hellman ........................95
+           7.4.2. Elliptic Curve Diffie-Hellman ......................96
+      7.5. Exporters .................................................97
+   8. 0-RTT and Anti-Replay ..........................................98
+      8.1. Single-Use Tickets ........................................99
+      8.2. Client Hello Recording ....................................99
+      8.3. Freshness Checks .........................................101
+   9. Compliance Requirements .......................................102
+      9.1. Mandatory-to-Implement Cipher Suites .....................102
+      9.2. Mandatory-to-Implement Extensions ........................103
+      9.3. Protocol Invariants ......................................104
+   10. Security Considerations ......................................106
+   11. IANA Considerations ..........................................106
+   12. References ...................................................109
+      12.1. Normative References ....................................109
+      12.2. Informative References ..................................112
+   Appendix A. State Machine ........................................120
+     A.1. Client ....................................................120
+     A.2. Server ....................................................121
+   Appendix B. Protocol Data Structures and Constant Values .........122
+     B.1. Record Layer ..............................................122
+     B.2. Alert Messages ............................................123
+     B.3. Handshake Protocol ........................................124
+       B.3.1. Key Exchange Messages .................................125
+       B.3.2. Server Parameters Messages ............................131
+       B.3.3. Authentication Messages ...............................132
+       B.3.4. Ticket Establishment ..................................132
+       B.3.5. Updating Keys .........................................133
+     B.4. Cipher Suites .............................................133
+
+
+
+
+Rescorla                     Standards Track                    [Page 4]
+
+RFC 8446                           TLS                       August 2018
+
+
+   Appendix C. Implementation Notes .................................134
+     C.1. Random Number Generation and Seeding ......................134
+     C.2. Certificates and Authentication ...........................135
+     C.3. Implementation Pitfalls ...................................135
+     C.4. Client Tracking Prevention ................................137
+     C.5. Unauthenticated Operation .................................137
+   Appendix D. Backward Compatibility ...............................138
+     D.1. Negotiating with an Older Server ..........................139
+     D.2. Negotiating with an Older Client ..........................139
+     D.3. 0-RTT Backward Compatibility ..............................140
+     D.4. Middlebox Compatibility Mode ..............................140
+     D.5. Security Restrictions Related to Backward Compatibility ...141
+   Appendix E. Overview of Security Properties ......................142
+     E.1. Handshake .................................................142
+       E.1.1. Key Derivation and HKDF ...............................145
+       E.1.2. Client Authentication .................................146
+       E.1.3. 0-RTT .................................................146
+       E.1.4. Exporter Independence .................................146
+       E.1.5. Post-Compromise Security ..............................146
+       E.1.6. External References ...................................147
+     E.2. Record Layer ..............................................147
+       E.2.1. External References ...................................148
+     E.3. Traffic Analysis ..........................................148
+     E.4. Side-Channel Attacks ......................................149
+     E.5. Replay Attacks on 0-RTT ...................................150
+       E.5.1. Replay and Exporters ..................................151
+     E.6. PSK Identity Exposure .....................................152
+     E.7. Sharing PSKs ..............................................152
+     E.8. Attacks on Static RSA .....................................152
+   Contributors .....................................................153
+   Author's Address .................................................160
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Rescorla                     Standards Track                    [Page 5]
+
+RFC 8446                           TLS                       August 2018
+
+
+1.  Introduction
+
+   The primary goal of TLS is to provide a secure channel between two
+   communicating peers; the only requirement from the underlying
+   transport is a reliable, in-order data stream.  Specifically, the
+   secure channel should provide the following properties:
+
+   -  Authentication: The server side of the channel is always
+      authenticated; the client side is optionally authenticated.
+      Authentication can happen via asymmetric cryptography (e.g., RSA
+      [RSA], the Elliptic Curve Digital Signature Algorithm (ECDSA)
+      [ECDSA], or the Edwards-Curve Digital Signature Algorithm (EdDSA)
+      [RFC8032]) or a symmetric pre-shared key (PSK).
+
+   -  Confidentiality: Data sent over the channel after establishment is
+      only visible to the endpoints.  TLS does not hide the length of
+      the data it transmits, though endpoints are able to pad TLS
+      records in order to obscure lengths and improve protection against
+      traffic analysis techniques.
+
+   -  Integrity: Data sent over the channel after establishment cannot
+      be modified by attackers without detection.
+
+   These properties should be true even in the face of an attacker who
+   has complete control of the network, as described in [RFC3552].  See
+   Appendix E for a more complete statement of the relevant security
+   properties.
+
+   TLS consists of two primary components:
+
+   -  A handshake protocol (Section 4) that authenticates the
+      communicating parties, negotiates cryptographic modes and
+      parameters, and establishes shared keying material.  The handshake
+      protocol is designed to resist tampering; an active attacker
+      should not be able to force the peers to negotiate different
+      parameters than they would if the connection were not under
+      attack.
+
+   -  A record protocol (Section 5) that uses the parameters established
+      by the handshake protocol to protect traffic between the
+      communicating peers.  The record protocol divides traffic up into
+      a series of records, each of which is independently protected
+      using the traffic keys.
+
+
+
+
+
+
+
+
+Rescorla                     Standards Track                    [Page 6]
+
+RFC 8446                           TLS                       August 2018
+
+
+   TLS is application protocol independent; higher-level protocols can
+   layer on top of TLS transparently.  The TLS standard, however, does
+   not specify how protocols add security with TLS; how to initiate TLS
+   handshaking and how to interpret the authentication certificates
+   exchanged are left to the judgment of the designers and implementors
+   of protocols that run on top of TLS.
+
+   This document defines TLS version 1.3.  While TLS 1.3 is not directly
+   compatible with previous versions, all versions of TLS incorporate a
+   versioning mechanism which allows clients and servers to
+   interoperably negotiate a common version if one is supported by both
+   peers.
+
+   This document supersedes and obsoletes previous versions of TLS,
+   including version 1.2 [RFC5246].  It also obsoletes the TLS ticket
+   mechanism defined in [RFC5077] and replaces it with the mechanism
+   defined in Section 2.2.  Because TLS 1.3 changes the way keys are
+   derived, it updates [RFC5705] as described in Section 7.5.  It also
+   changes how Online Certificate Status Protocol (OCSP) messages are
+   carried and therefore updates [RFC6066] and obsoletes [RFC6961] as
+   described in Section 4.4.2.1.
+
+1.1.  Conventions and Terminology
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in
+   BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+   The following terms are used:
+
+   client:  The endpoint initiating the TLS connection.
+
+   connection:  A transport-layer connection between two endpoints.
+
+   endpoint:  Either the client or server of the connection.
+
+   handshake:  An initial negotiation between client and server that
+      establishes the parameters of their subsequent interactions
+      within TLS.
+
+   peer:  An endpoint.  When discussing a particular endpoint, "peer"
+      refers to the endpoint that is not the primary subject of
+      discussion.
+
+
+
+
+
+
+Rescorla                     Standards Track                    [Page 7]
+
+RFC 8446                           TLS                       August 2018
+
+
+   receiver:  An endpoint that is receiving records.
+
+   sender:  An endpoint that is transmitting records.
+
+   server:  The endpoint that did not initiate the TLS connection.
+
+1.2.  Major Differences from TLS 1.2
+
+   The following is a list of the major functional differences between
+   TLS 1.2 and TLS 1.3.  It is not intended to be exhaustive, and there
+   are many minor differences.
+
+   -  The list of supported symmetric encryption algorithms has been
+      pruned of all algorithms that are considered legacy.  Those that
+      remain are all Authenticated Encryption with Associated Data
+      (AEAD) algorithms.  The cipher suite concept has been changed to
+      separate the authentication and key exchange mechanisms from the
+      record protection algorithm (including secret key length) and a
+      hash to be used with both the key derivation function and
+      handshake message authentication code (MAC).
+
+   -  A zero round-trip time (0-RTT) mode was added, saving a round trip
+      at connection setup for some application data, at the cost of
+      certain security properties.
+
+   -  Static RSA and Diffie-Hellman cipher suites have been removed; all
+      public-key based key exchange mechanisms now provide forward
+      secrecy.
+
+   -  All handshake messages after the ServerHello are now encrypted.
+      The newly introduced EncryptedExtensions message allows various
+      extensions previously sent in the clear in the ServerHello to also
+      enjoy confidentiality protection.
+
+   -  The key derivation functions have been redesigned.  The new design
+      allows easier analysis by cryptographers due to their improved key
+      separation properties.  The HMAC-based Extract-and-Expand Key
+      Derivation Function (HKDF) is used as an underlying primitive.
+
+   -  The handshake state machine has been significantly restructured to
+      be more consistent and to remove superfluous messages such as
+      ChangeCipherSpec (except when needed for middlebox compatibility).
+
+   -  Elliptic curve algorithms are now in the base spec, and new
+      signature algorithms, such as EdDSA, are included.  TLS 1.3
+      removed point format negotiation in favor of a single point format
+      for each curve.
+
+
+
+
+Rescorla                     Standards Track                    [Page 8]
+
+RFC 8446                           TLS                       August 2018
+
+
+   -  Other cryptographic improvements were made, including changing the
+      RSA padding to use the RSA Probabilistic Signature Scheme
+      (RSASSA-PSS), and the removal of compression, the Digital
+      Signature Algorithm (DSA), and custom Ephemeral Diffie-Hellman
+      (DHE) groups.
+
+   -  The TLS 1.2 version negotiation mechanism has been deprecated in
+      favor of a version list in an extension.  This increases
+      compatibility with existing servers that incorrectly implemented
+      version negotiation.
+
+   -  Session resumption with and without server-side state as well as
+      the PSK-based cipher suites of earlier TLS versions have been
+      replaced by a single new PSK exchange.
+
+   -  References have been updated to point to the updated versions of
+      RFCs, as appropriate (e.g., RFC 5280 rather than RFC 3280).
+
+1.3.  Updates Affecting TLS 1.2
+
+   This document defines several changes that optionally affect
+   implementations of TLS 1.2, including those which do not also support
+   TLS 1.3:
+
+   -  A version downgrade protection mechanism is described in
+      Section 4.1.3.
+
+   -  RSASSA-PSS signature schemes are defined in Section 4.2.3.
+
+   -  The "supported_versions" ClientHello extension can be used to
+      negotiate the version of TLS to use, in preference to the
+      legacy_version field of the ClientHello.
+
+   -  The "signature_algorithms_cert" extension allows a client to
+      indicate which signature algorithms it can validate in X.509
+      certificates.
+
+   Additionally, this document clarifies some compliance requirements
+   for earlier versions of TLS; see Section 9.3.
+
+
+
+
+
+
+
+
+
+
+
+
+Rescorla                     Standards Track                    [Page 9]
+
+RFC 8446                           TLS                       August 2018
+
+
+2.  Protocol Overview
+
+   The cryptographic parameters used by the secure channel are produced
+   by the TLS handshake protocol.  This sub-protocol of TLS is used by
+   the client and server when first communicating with each other.  The
+   handshake protocol allows peers to negotiate a protocol version,
+   select cryptographic algorithms, optionally authenticate each other,
+   and establish shared secret keying material.  Once the handshake is
+   complete, the peers use the established keys to protect the
+   application-layer traffic.
+
+   A failure of the handshake or other protocol error triggers the
+   termination of the connection, optionally preceded by an alert
+   message (Section 6).
+
+   TLS supports three basic key exchange modes:
+
+   -  (EC)DHE (Diffie-Hellman over either finite fields or elliptic
+      curves)
+
+   -  PSK-only
+
+   -  PSK with (EC)DHE
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Rescorla                     Standards Track                   [Page 10]
+
+RFC 8446                           TLS                       August 2018
+
+
+   Figure 1 below shows the basic full TLS handshake:
+
+       Client                                           Server
+
+Key  ^ ClientHello
+Exch | + key_share*
+     | + signature_algorithms*
+     | + psk_key_exchange_modes*
+     v + pre_shared_key*       -------->
+                                                  ServerHello  ^ Key
+                                                 + key_share*  | Exch
+                                            + pre_shared_key*  v
+                                        {EncryptedExtensions}  ^  Server
+                                        {CertificateRequest*}  v  Params
+                                               {Certificate*}  ^
+                                         {CertificateVerify*}  | Auth
+                                                   {Finished}  v
+                               <--------  [Application Data*]
+     ^ {Certificate*}
+Auth | {CertificateVerify*}
+     v {Finished}              -------->
+       [Application Data]      <------->  [Application Data]
+
+              +  Indicates noteworthy extensions sent in the
+                 previously noted message.
+
+              *  Indicates optional or situation-dependent
+                 messages/extensions that are not always sent.
+
+              {} Indicates messages protected using keys
+                 derived from a [sender]_handshake_traffic_secret.
+
+              [] Indicates messages protected using keys
+                 derived from [sender]_application_traffic_secret_N.
+
+               Figure 1: Message Flow for Full TLS Handshake
+
+   The handshake can be thought of as having three phases (indicated in
+   the diagram above):
+
+   -  Key Exchange: Establish shared keying material and select the
+      cryptographic parameters.  Everything after this phase is
+      encrypted.
+
+   -  Server Parameters: Establish other handshake parameters
+      (whether the client is authenticated, application-layer protocol
+      support, etc.).
+
+
+
+
+Rescorla                     Standards Track                   [Page 11]
+
+RFC 8446                           TLS                       August 2018
+
+
+   -  Authentication: Authenticate the server (and, optionally, the
+      client) and provide key confirmation and handshake integrity.
+
+   In the Key Exchange phase, the client sends the ClientHello
+   (Section 4.1.2) message, which contains a random nonce
+   (ClientHello.random); its offered protocol versions; a list of
+   symmetric cipher/HKDF hash pairs; either a set of Diffie-Hellman key
+   shares (in the "key_share" (Section 4.2.8) extension), a set of
+   pre-shared key labels (in the "pre_shared_key" (Section 4.2.11)
+   extension), or both; and potentially additional extensions.
+   Additional fields and/or messages may also be present for middlebox
+   compatibility.
+
+   The server processes the ClientHello and determines the appropriate
+   cryptographic parameters for the connection.  It then responds with
+   its own ServerHello (Section 4.1.3), which indicates the negotiated
+   connection parameters.  The combination of the ClientHello and the
+   ServerHello determines the shared keys.  If (EC)DHE key establishment
+   is in use, then the ServerHello contains a "key_share" extension with
+   the server's ephemeral Diffie-Hellman share; the server's share MUST
+   be in the same group as one of the client's shares.  If PSK key
+   establishment is in use, then the ServerHello contains a
+   "pre_shared_key" extension indicating which of the client's offered
+   PSKs was selected.  Note that implementations can use (EC)DHE and PSK
+   together, in which case both extensions will be supplied.
+
+   The server then sends two messages to establish the Server
+   Parameters:
+
+   EncryptedExtensions:  responses to ClientHello extensions that are
+      not required to determine the cryptographic parameters, other than
+      those that are specific to individual certificates.
+      [Section 4.3.1]
+
+   CertificateRequest:  if certificate-based client authentication is
+      desired, the desired parameters for that certificate.  This
+      message is omitted if client authentication is not desired.
+      [Section 4.3.2]
+
+
+
+
+
+
+
+
+
+
+
+
+
+Rescorla                     Standards Track                   [Page 12]
+
+RFC 8446                           TLS                       August 2018
+
+
+   Finally, the client and server exchange Authentication messages.  TLS
+   uses the same set of messages every time that certificate-based
+   authentication is needed.  (PSK-based authentication happens as a
+   side effect of key exchange.)  Specifically:
+
+   Certificate:  The certificate of the endpoint and any per-certificate
+      extensions.  This message is omitted by the server if not
+      authenticating with a certificate and by the client if the server
+      did not send CertificateRequest (thus indicating that the client
+      should not authenticate with a certificate).  Note that if raw
+      public keys [RFC7250] or the cached information extension
+      [RFC7924] are in use, then this message will not contain a
+      certificate but rather some other value corresponding to the
+      server's long-term key.  [Section 4.4.2]
+
+   CertificateVerify:  A signature over the entire handshake using the
+      private key corresponding to the public key in the Certificate
+      message.  This message is omitted if the endpoint is not
+      authenticating via a certificate.  [Section 4.4.3]
+
+   Finished:  A MAC (Message Authentication Code) over the entire
+      handshake.  This message provides key confirmation, binds the
+      endpoint's identity to the exchanged keys, and in PSK mode also
+      authenticates the handshake.  [Section 4.4.4]
+
+   Upon receiving the server's messages, the client responds with its
+   Authentication messages, namely Certificate and CertificateVerify (if
+   requested), and Finished.
+
+   At this point, the handshake is complete, and the client and server
+   derive the keying material required by the record layer to exchange
+   application-layer data protected through authenticated encryption.
+   Application Data MUST NOT be sent prior to sending the Finished
+   message, except as specified in Section 2.3.  Note that while the
+   server may send Application Data prior to receiving the client's
+   Authentication messages, any data sent at that point is, of course,
+   being sent to an unauthenticated peer.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Rescorla                     Standards Track                   [Page 13]
+
+RFC 8446                           TLS                       August 2018
+
+
+2.1.  Incorrect DHE Share
+
+   If the client has not provided a sufficient "key_share" extension
+   (e.g., it includes only DHE or ECDHE groups unacceptable to or
+   unsupported by the server), the server corrects the mismatch with a
+   HelloRetryRequest and the client needs to restart the handshake with
+   an appropriate "key_share" extension, as shown in Figure 2.  If no
+   common cryptographic parameters can be negotiated, the server MUST
+   abort the handshake with an appropriate alert.
+
+        Client                                               Server
+
+        ClientHello
+        + key_share             -------->
+                                                  HelloRetryRequest
+                                <--------               + key_share
+        ClientHello
+        + key_share             -------->
+                                                        ServerHello
+                                                        + key_share
+                                              {EncryptedExtensions}
+                                              {CertificateRequest*}
+                                                     {Certificate*}
+   
+
+404: Not Found
+
+{
+    "type": "bundle",
+    "id": "bundle--6a1237ca-4d75-413b-90d1-afacde81fed0",
+    "objects": [
+        {
+            "type": "x-mitre-matrix",
+            "id": "x-mitre-matrix--eafc1b4c-5e56-4965-bd4e-66a6a89c88cc",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "revoked": false,
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/matrices/enterprise",
+                    "external_id": "enterprise-attack"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2026-04-14T22:56:22.555Z",
+            "name": "Enterprise ATT&CK",
+            "description": "Below are the tactics and techniques representing the MITRE ATT&CK Matrix for Enterprise. The Matrix contains information for the following platforms: Windows, macOS, Linux, PRE, Office Suite, Identity Provider, SaaS, IaaS, Network Devices, Containers, ESXi.",
+            "tactic_refs": [
+                "x-mitre-tactic--daa4cbb1-b4f4-4723-a824-7f1efd6e0592",
+                "x-mitre-tactic--d679bca2-e57d-4935-8650-8031c87a4400",
+                "x-mitre-tactic--ffd5bcee-6e16-4dd2-8eca-7b3beedf33ca",
+                "x-mitre-tactic--4ca45d45-df4d-4613-8980-bac22d278fa5",
+                "x-mitre-tactic--5bc1d813-693e-4823-9961-abf9af4b0e92",
+                "x-mitre-tactic--5e29b093-294e-49e9-a803-dab3d73b77dd",
+                "x-mitre-tactic--78b23412-0651-46d7-a540-170a1ce8bd5a",
+                "x-mitre-tactic--43c49635-f2fa-44f2-92b9-0ee980bbf4ef",
+                "x-mitre-tactic--2558fd61-8c75-4730-94c4-11926db2a263",
+                "x-mitre-tactic--c17c5845-175e-4421-9713-829d0573dbc9",
+                "x-mitre-tactic--7141578b-e50b-4dcc-bfa4-08a8dd689e9e",
+                "x-mitre-tactic--d108ce10-2419-4cf9-a774-46161d6c6cfe",
+                "x-mitre-tactic--f72804c5-f15a-449e-a5da-2eecd181f813",
+                "x-mitre-tactic--9a4e74ab-5008-408c-84bf-a10dfbc53462",
+                "x-mitre-tactic--5569339b-94c2-49ee-afb3-2222936582c8"
+            ],
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": false,
+            "x_mitre_version": "2.0",
+            "x_mitre_attack_spec_version": "3.3.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--00d7d21b-69d6-4797-88a2-c86f3fc97651",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1174",
+                    "external_id": "T1174"
+                },
+                {
+                    "source_name": "Microsoft Install Password Filter n.d",
+                    "description": "Microsoft. (n.d.). Installing and Registering a Password Filter DLL. Retrieved November 21, 2017.",
+                    "url": "https://msdn.microsoft.com/library/windows/desktop/ms721766.aspx"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:39.912Z",
+            "name": "Password Filter DLL Mitigation",
+            "description": "Ensure only valid password filters are registered. Filter DLLs must be present in Windows installation directory (<code>C:\\Windows\\System32\\</code> by default) of a domain controller and/or local computer with a corresponding entry in <code>HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Lsa\\Notification Packages</code>. (Citation: Microsoft Install Password Filter n.d)",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--02f0f92a-0a51-4c94-9bda-6437b9a93f22",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1151",
+                    "external_id": "T1151"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:40.127Z",
+            "name": "Space after Filename Mitigation",
+            "description": "Prevent files from having a trailing space after the extension.",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--03c0c586-50ed-45a7-95f4-f496d7eb5330",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1148",
+                    "external_id": "T1148"
+                },
+                {
+                    "source_name": "Securing bash history",
+                    "description": "Mathew Branwell. (2012, March 21). Securing .bash_history file. Retrieved July 8, 2017.",
+                    "url": "http://www.akyl.net/securing-bashhistory-file-make-sure-your-linux-system-users-won%E2%80%99t-hide-or-delete-their-bashhistory"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:40.291Z",
+            "name": "HISTCONTROL Mitigation",
+            "description": "Prevent users from changing the <code>HISTCONTROL</code> environment variable (Citation: Securing bash history). Also, make sure that the <code>HISTCONTROL</code> environment variable is set to \u201cignoredup\u201d instead of \u201cignoreboth\u201d or \u201cignorespace\u201d.",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--0472af99-f25c-4abe-9fce-010fa3450e72",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1081",
+                    "external_id": "T1081"
+                },
+                {
+                    "source_name": "Microsoft MS14-025",
+                    "description": "Microsoft. (2014, May 13). MS14-025: Vulnerability in Group Policy Preferences could allow elevation of privilege. Retrieved January 28, 2015.",
+                    "url": "http://support.microsoft.com/kb/2962486"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:40.502Z",
+            "name": "Credentials in Files Mitigation",
+            "description": "Establish an organizational policy that prohibits password storage in files. Ensure that developers and system administrators are aware of the risk associated with having plaintext passwords in software configuration files that may be left on endpoint systems or servers. Preemptively search for files containing passwords and remove when found. Restrict file shares to specific directories with access only to necessary users. Remove vulnerable Group Policy Preferences. (Citation: Microsoft MS14-025)",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--06160d81-62be-46e5-aa37-4b9c645ffa31",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1212",
+                    "external_id": "T1212"
+                },
+                {
+                    "source_name": "Ars Technica Pwn2Own 2017 VM Escape",
+                    "description": "Goodin, D. (2017, March 17). Virtual machine escape fetches $105,000 at Pwn2Own hacking contest - updated. Retrieved March 12, 2018.",
+                    "url": "https://arstechnica.com/information-technology/2017/03/hack-that-escapes-vm-by-exploiting-edge-browser-fetches-105000-at-pwn2own/"
+                },
+                {
+                    "source_name": "TechNet Moving Beyond EMET",
+                    "description": "Nunez, N. (2017, August 9). Moving Beyond EMET II \u2013 Windows Defender Exploit Guard. Retrieved March 12, 2018.",
+                    "url": "https://blogs.technet.microsoft.com/srd/2017/08/09/moving-beyond-emet-ii-windows-defender-exploit-guard/"
+                },
+                {
+                    "source_name": "Wikipedia Control Flow Integrity",
+                    "description": "Wikipedia. (2018, January 11). Control-flow integrity. Retrieved March 12, 2018.",
+                    "url": "https://en.wikipedia.org/wiki/Control-flow_integrity"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:40.671Z",
+            "name": "Exploitation for Credential Access Mitigation",
+            "description": "Update software regularly by employing patch management for internal enterprise endpoints and servers. Develop a robust cyber threat intelligence capability to determine what types and levels of threat may use software exploits and 0-days against a particular organization. Make it difficult for adversaries to advance their operation through exploitation of undiscovered or unpatched vulnerabilities by using sandboxing, if available. Other types of virtualization and application microsegmentation may also mitigate the impact of some types of exploitation. The risks of additional exploits and weaknesses in implementation may still exist. (Citation: Ars Technica Pwn2Own 2017 VM Escape)\n\nSecurity applications that look for behavior used during exploitation such as Windows Defender Exploit Guard (WDEG) and the Enhanced Mitigation Experience Toolkit (EMET) can be used to mitigate some exploitation behavior. (Citation: TechNet Moving Beyond EMET) Control flow integrity checking is another way to potentially identify and stop a software exploit from occurring. (Citation: Wikipedia Control Flow Integrity) Many of these protections depend on the architecture and target application binary for compatibility and may not work for software targeted for defense evasion.",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--0640214c-95af-4c04-a574-2a1ba6dda00b",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1012",
+                    "external_id": "T1012"
+                },
+                {
+                    "source_name": "Beechey 2010",
+                    "description": "Beechey, J. (2010, December). Application Whitelisting: Panacea or Propaganda?. Retrieved November 18, 2014.",
+                    "url": "http://www.sans.org/reading-room/whitepapers/application/application-whitelisting-panacea-propaganda-33599"
+                },
+                {
+                    "source_name": "Windows Commands JPCERT",
+                    "description": "Tomonaga, S. (2016, January 26). Windows Commands Abused by Attackers. Retrieved February 2, 2016.",
+                    "url": "http://blog.jpcert.or.jp/2016/01/windows-commands-abused-by-attackers.html"
+                },
+                {
+                    "source_name": "NSA MS AppLocker",
+                    "description": "NSA Information Assurance Directorate. (2014, August). Application Whitelisting Using Microsoft AppLocker. Retrieved March 31, 2016.",
+                    "url": "https://apps.nsa.gov/iaarchive/library/ia-guidance/tech-briefs/application-whitelisting-using-microsoft-applocker.cfm"
+                },
+                {
+                    "source_name": "Corio 2008",
+                    "description": "Corio, C., & Sayana, D. P. (2008, June). Application Lockdown with Software Restriction Policies. Retrieved November 18, 2014.",
+                    "url": "http://technet.microsoft.com/en-us/magazine/2008.06.srp.aspx"
+                },
+                {
+                    "source_name": "TechNet Applocker vs SRP",
+                    "description": "Microsoft. (2012, June 27). Using Software Restriction Policies and AppLocker Policies. Retrieved April 7, 2016.",
+                    "url": "https://technet.microsoft.com/en-us/library/ee791851.aspx"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:40.840Z",
+            "name": "Query Registry Mitigation",
+            "description": "Identify unnecessary system utilities or potentially malicious software that may be used to acquire information within the Registry, and audit and/or block them by using whitelisting (Citation: Beechey 2010) tools, like AppLocker, (Citation: Windows Commands JPCERT) (Citation: NSA MS AppLocker) or Software Restriction Policies (Citation: Corio 2008) where appropriate. (Citation: TechNet Applocker vs SRP)",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--06824aa2-94a5-474c-97f6-57c2e983d885",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1162",
+                    "external_id": "T1162"
+                },
+                {
+                    "source_name": "Re-Open windows on Mac",
+                    "description": "Apple. (2016, December 6). Automatically re-open windows, apps, and documents on your Mac. Retrieved July 11, 2017.",
+                    "url": "https://support.apple.com/en-us/HT204005"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:41.043Z",
+            "name": "Login Item Mitigation",
+            "description": "Restrict users from being able to create their own login items. Additionally, holding the shift key during login prevents apps from opening automatically (Citation: Re-Open windows on Mac).",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--073cc04d-ac46-4f5a-85d7-83a91ecd6a19",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1166",
+                    "external_id": "T1166"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:41.210Z",
+            "name": "Setuid and Setgid Mitigation",
+            "description": "Applications with known vulnerabilities or known shell escapes should not have the setuid or setgid bits set to reduce potential damage if an application is compromised. Additionally, the number of programs with setuid or setgid bits set should be minimized across a system.",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--08e02f67-ea09-4f77-a70b-414963c29fc2",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1223",
+                    "external_id": "T1223"
+                },
+                {
+                    "source_name": "PaloAlto Preventing Opportunistic Attacks Apr 2016",
+                    "description": "Kiwi. (2016, April 6). Breakout Recap: Cybersecurity Best Practices Part 1 - Preventing Opportunistic Attacks. Retrieved October 3, 2018.",
+                    "url": "https://live.paloaltonetworks.com/t5/Ignite-2016-Blog/Breakout-Recap-Cybersecurity-Best-Practices-Part-1-Preventing/ba-p/75913"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:41.389Z",
+            "name": "Compiled HTML File Mitigation",
+            "description": "Consider blocking download/transfer and execution of potentially uncommon file types known to be used in adversary campaigns, such as CHM files. (Citation: PaloAlto Preventing Opportunistic Attacks Apr 2016) Also consider using application whitelisting to prevent execution of hh.exe if it is not required for a given system or network to prevent potential misuse by adversaries.",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--0b3ee33e-430b-476f-9525-72d120c90f8d",
+            "created": "2019-03-14T20:17:16.234Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1488",
+                    "external_id": "T1488"
+                },
+                {
+                    "source_name": "Ready.gov IT DRP",
+                    "description": "Ready.gov. (n.d.). IT Disaster Recovery Plan. Retrieved March 15, 2019.",
+                    "url": "https://www.ready.gov/business/implementation/IT"
+                },
+                {
+                    "source_name": "Beechey 2010",
+                    "description": "Beechey, J. (2010, December). Application Whitelisting: Panacea or Propaganda?. Retrieved November 18, 2014.",
+                    "url": "http://www.sans.org/reading-room/whitepapers/application/application-whitelisting-panacea-propaganda-33599"
+                },
+                {
+                    "source_name": "Windows Commands JPCERT",
+                    "description": "Tomonaga, S. (2016, January 26). Windows Commands Abused by Attackers. Retrieved February 2, 2016.",
+                    "url": "https://blogs.jpcert.or.jp/en/2016/01/windows-commands-abused-by-attackers.html"
+                },
+                {
+                    "source_name": "NSA MS AppLocker",
+                    "description": "NSA Information Assurance Directorate. (2014, August). Application Whitelisting Using Microsoft AppLocker. Retrieved March 31, 2016.",
+                    "url": "https://apps.nsa.gov/iaarchive/library/ia-guidance/tech-briefs/application-whitelisting-using-microsoft-applocker.cfm"
+                },
+                {
+                    "source_name": "Corio 2008",
+                    "description": "Corio, C., & Sayana, D. P. (2008, June). Application Lockdown with Software Restriction Policies. Retrieved November 18, 2014.",
+                    "url": "http://technet.microsoft.com/en-us/magazine/2008.06.srp.aspx"
+                },
+                {
+                    "source_name": "TechNet Applocker vs SRP",
+                    "description": "Microsoft. (2012, June 27). Using Software Restriction Policies and AppLocker Policies. Retrieved April 7, 2016.",
+                    "url": "https://technet.microsoft.com/en-us/library/ee791851.aspx"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:41.583Z",
+            "name": "Data Destruction Mitigation",
+            "description": "Consider implementing IT disaster recovery plans that contain procedures for taking regular data backups that can be used to restore organizational data.(Citation: Ready.gov IT DRP) Ensure backups are stored off system and is protected from common methods adversaries may use to gain access and destroy the backups to prevent recovery.\n\nIdentify potentially malicious software and audit and/or block it by using whitelisting(Citation: Beechey 2010) tools, like AppLocker,(Citation: Windows Commands JPCERT)(Citation: NSA MS AppLocker) or Software Restriction Policies(Citation: Corio 2008) where appropriate.(Citation: TechNet Applocker vs SRP)",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--0bc3ce00-83bc-4a92-a042-79ffbc6af259",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1084",
+                    "external_id": "T1084"
+                },
+                {
+                    "source_name": "FireEye WMI 2015",
+                    "description": "Ballenthin, W., et al. (2015). Windows Management Instrumentation (WMI) Offense, Defense, and Forensics. Retrieved March 30, 2016.",
+                    "url": "https://www.fireeye.com/content/dam/fireeye-www/global/en/current-threats/pdfs/wp-windows-management-instrumentation.pdf"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:41.767Z",
+            "name": "Windows Management Instrumentation Event Subscription Mitigation",
+            "description": "Disabling WMI services may cause system instability and should be evaluated to assess the impact to a network. By default, only administrators are allowed to connect remotely using WMI; restrict other users that are allowed to connect, or disallow all users from connecting remotely to WMI. Prevent credential overlap across systems of administrator and privileged accounts. (Citation: FireEye WMI 2015)",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--1022138b-497c-40e6-b53a-13351cbd4090",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1044",
+                    "external_id": "T1044"
+                },
+                {
+                    "source_name": "Powersploit",
+                    "description": "PowerSploit. (n.d.). Retrieved December 4, 2014.",
+                    "url": "https://github.com/mattifestation/PowerSploit"
+                },
+                {
+                    "source_name": "Beechey 2010",
+                    "description": "Beechey, J. (2010, December). Application Whitelisting: Panacea or Propaganda?. Retrieved November 18, 2014.",
+                    "url": "http://www.sans.org/reading-room/whitepapers/application/application-whitelisting-panacea-propaganda-33599"
+                },
+                {
+                    "source_name": "Windows Commands JPCERT",
+                    "description": "Tomonaga, S. (2016, January 26). Windows Commands Abused by Attackers. Retrieved February 2, 2016.",
+                    "url": "https://blogs.jpcert.or.jp/en/2016/01/windows-commands-abused-by-attackers.html"
+                },
+                {
+                    "source_name": "NSA MS AppLocker",
+                    "description": "NSA Information Assurance Directorate. (2014, August). Application Whitelisting Using Microsoft AppLocker. Retrieved March 31, 2016.",
+                    "url": "https://apps.nsa.gov/iaarchive/library/ia-guidance/tech-briefs/application-whitelisting-using-microsoft-applocker.cfm"
+                },
+                {
+                    "source_name": "Seclists Kanthak 7zip Installer",
+                    "description": "Kanthak, S. (2015, December 8). Executable installers are vulnerable^WEVIL (case 7): 7z*.exe\tallows remote code execution with escalation of privilege. Retrieved March 10, 2017.",
+                    "url": "http://seclists.org/fulldisclosure/2015/Dec/34"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:41.940Z",
+            "name": "File System Permissions Weakness Mitigation",
+            "description": "Use auditing tools capable of detecting file system permissions abuse opportunities on systems within an enterprise and correct them. Limit privileges of user accounts and groups so that only authorized administrators can interact with service changes and service binary target path locations. Toolkits like the PowerSploit framework contain PowerUp modules that can be used to explore systems for service file system permissions weaknesses. (Citation: Powersploit)\n\nIdentify and block potentially malicious software that may be executed through abuse of file, directory, and service permissions by using whitelisting (Citation: Beechey 2010) tools, like AppLocker, (Citation: Windows Commands JPCERT) (Citation: NSA MS AppLocker) that are capable of auditing and/or blocking unknown programs. Deny execution from user directories such as fil
+
+404: Not Found
+
+404: Not Found
+

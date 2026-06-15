@@ -1,0 +1,758 @@
+
+
+
+
+
+
+Internet Engineering Task Force (IETF)                       E. Rescorla
+Request for Comments: 8446                                       Mozilla
+Obsoletes: 5077, 5246, 6961                                  August 2018
+Updates: 5705, 6066
+Category: Standards Track
+ISSN: 2070-1721
+
+
+        The Transport Layer Security (TLS) Protocol Version 1.3
+
+Abstract
+
+   This document specifies version 1.3 of the Transport Layer Security
+   (TLS) protocol.  TLS allows client/server applications to communicate
+   over the Internet in a way that is designed to prevent eavesdropping,
+   tampering, and message forgery.
+
+   This document updates RFCs 5705 and 6066, and obsoletes RFCs 5077,
+   5246, and 6961.  This document also specifies new requirements for
+   TLS 1.2 implementations.
+
+Status of This Memo
+
+   This is an Internet Standards Track document.
+
+   This document is a product of the Internet Engineering Task Force
+   (IETF).  It represents the consensus of the IETF community.  It has
+   received public review and has been approved for publication by the
+   Internet Engineering Steering Group (IESG).  Further information on
+   Internet Standards is available in Section 2 of RFC 7841.
+
+   Information about the current status of this document, any errata,
+   and how to provide feedback on it may be obtained at
+   https://www.rfc-editor.org/info/rfc8446.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Rescorla                     Standards Track                    [Page 1]
+
+RFC 8446                           TLS                       August 2018
+
+
+Copyright Notice
+
+   Copyright (c) 2018 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (https://trustee.ietf.org/license-info) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+   This document may contain material from IETF Documents or IETF
+   Contributions published or made publicly available before November
+   10, 2008.  The person(s) controlling the copyright in some of this
+   material may not have granted the IETF Trust the right to allow
+   modifications of such material outside the IETF Standards Process.
+   Without obtaining an adequate license from the person(s) controlling
+   the copyright in such materials, this document may not be modified
+   outside the IETF Standards Process, and derivative works of it may
+   not be created outside the IETF Standards Process, except to format
+   it for publication as an RFC or to translate it into languages other
+   than English.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Rescorla                     Standards Track                    [Page 2]
+
+RFC 8446                           TLS                       August 2018
+
+
+Table of Contents
+
+   1. Introduction ....................................................6
+      1.1. Conventions and Terminology ................................7
+      1.2. Major Differences from TLS 1.2 .............................8
+      1.3. Updates Affecting TLS 1.2 ..................................9
+   2. Protocol Overview ..............................................10
+      2.1. Incorrect DHE Share .......................................14
+      2.2. Resumption and Pre-Shared Key (PSK) .......................15
+      2.3. 0-RTT Data ................................................17
+   3. Presentation Language ..........................................19
+      3.1. Basic Block Size ..........................................19
+      3.2. Miscellaneous .............................................20
+      3.3. Numbers ...................................................20
+      3.4. Vectors ...................................................20
+      3.5. Enumerateds ...............................................21
+      3.6. Constructed Types .........................................22
+      3.7. Constants .................................................23
+      3.8. Variants ..................................................23
+   4. Handshake Protocol .............................................24
+      4.1. Key Exchange Messages .....................................25
+           4.1.1. Cryptographic Negotiation ..........................26
+           4.1.2. Client Hello .......................................27
+           4.1.3. Server Hello .......................................31
+           4.1.4. Hello Retry Request ................................33
+      4.2. Extensions ................................................35
+           4.2.1. Supported Versions .................................39
+           4.2.2. Cookie .............................................40
+           4.2.3. Signature Algorithms ...............................41
+           4.2.4. Certificate Authorities ............................45
+           4.2.5. OID Filters ........................................45
+           4.2.6. Post-Handshake Client Authentication ...............47
+           4.2.7. Supported Groups ...................................47
+           4.2.8. Key Share ..........................................48
+           4.2.9. Pre-Shared Key Exchange Modes ......................51
+           4.2.10. Early Data Indication .............................52
+           4.2.11. Pre-Shared Key Extension ..........................55
+      4.3. Server Parameters .........................................59
+           4.3.1. Encrypted Extensions ...............................60
+           4.3.2. Certificate Request ................................60
+      4.4. Authentication Messages ...................................61
+           4.4.1. The Transcript Hash ................................63
+           4.4.2. Certificate ........................................64
+           4.4.3. Certificate Verify .................................69
+           4.4.4. Finished ...........................................71
+      4.5. End of Early Data .........................................72
+
+
+
+
+
+Rescorla                     Standards Track                    [Page 3]
+
+RFC 8446                           TLS                       August 2018
+
+
+      4.6. Post-Handshake Messages ...................................73
+           4.6.1. New Session Ticket Message .........................73
+           4.6.2. Post-Handshake Authentication ......................75
+           4.6.3. Key and Initialization Vector Update ...............76
+   5. Record Protocol ................................................77
+      5.1. Record Layer ..............................................78
+      5.2. Record Payload Protection .................................80
+      5.3. Per-Record Nonce ..........................................82
+      5.4. Record Padding ............................................83
+      5.5. Limits on Key Usage .......................................84
+   6. Alert Protocol .................................................85
+      6.1. Closure Alerts ............................................87
+      6.2. Error Alerts ..............................................88
+   7. Cryptographic Computations .....................................90
+      7.1. Key Schedule ..............................................91
+      7.2. Updating Traffic Secrets ..................................94
+      7.3. Traffic Key Calculation ...................................95
+      7.4. (EC)DHE Shared Secret Calculation .........................95
+           7.4.1. Finite Field Diffie-Hellman ........................95
+           7.4.2. Elliptic Curve Diffie-Hellman ......................96
+      7.5. Exporters .................................................97
+   8. 0-RTT and Anti-Replay ..........................................98
+      8.1. Single-Use Tickets ........................................99
+      8.2. Client Hello Recording ....................................99
+      8.3. Freshness Checks .........................................101
+   9. Compliance Requirements .......................................102
+      9.1. Mandatory-to-Implement Cipher Suites .....................102
+      9.2. Mandatory-to-Implement Extensions ........................103
+      9.3. Protocol Invariants ......................................104
+   10. Security Considerations ......................................106
+   11. IANA Considerations ..........................................106
+   12. References ...................................................109
+      12.1. Normative References ....................................109
+      12.2. Informative References ..................................112
+   Appendix A. State Machine ........................................120
+     A.1. Client ....................................................120
+     A.2. Server ....................................................121
+   Appendix B. Protocol Data Structures and Constant Values .........122
+     B.1. Record Layer ..............................................122
+     B.2. Alert Messages ............................................123
+     B.3. Handshake Protocol ........................................124
+       B.3.1. Key Exchange Messages .................................125
+       B.3.2. Server Parameters Messages ............................131
+       B.3.3. Authentication Messages ...............................132
+       B.3.4. Ticket Establishment ..................................132
+       B.3.5. Updating Keys .........................................133
+     B.4. Cipher Suites .............................................133
+
+
+
+
+Rescorla                     Standards Track                    [Page 4]
+
+RFC 8446                           TLS                       August 2018
+
+
+   Appendix C. Implementation Notes .................................134
+     C.1. Random Number Generation and Seeding ......................134
+     C.2. Certificates and Authentication ...........................135
+     C.3. Implementation Pitfalls ...................................135
+     C.4. Client Tracking Prevention ................................137
+     C.5. Unauthenticated Operation .................................137
+   Appendix D. Backward Compatibility ...............................138
+     D.1. Negotiating with an Older Server ..........................139
+     D.2. Negotiating with an Older Client ..........................139
+     D.3. 0-RTT Backward Compatibility ..............................140
+     D.4. Middlebox Compatibility Mode ..............................140
+     D.5. Security Restrictions Related to Backward Compatibility ...141
+   Appendix E. Overview of Security Properties ......................142
+     E.1. Handshake .................................................142
+       E.1.1. Key Derivation and HKDF ...............................145
+       E.1.2. Client Authentication .................................146
+       E.1.3. 0-RTT .................................................146
+       E.1.4. Exporter Independence .................................146
+       E.1.5. Post-Compromise Security ..............................146
+       E.1.6. External References ...................................147
+     E.2. Record Layer ..............................................147
+       E.2.1. External References ...................................148
+     E.3. Traffic Analysis ..........................................148
+     E.4. Side-Channel Attacks ......................................149
+     E.5. Replay Attacks on 0-RTT ...................................150
+       E.5.1. Replay and Exporters ..................................151
+     E.6. PSK Identity Exposure .....................................152
+     E.7. Sharing PSKs ..............................................152
+     E.8. Attacks on Static RSA .....................................152
+   Contributors .....................................................153
+   Author's Address .................................................160
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Rescorla                     Standards Track                    [Page 5]
+
+RFC 8446                           TLS                       August 2018
+
+
+1.  Introduction
+
+   The primary goal of TLS is to provide a secure channel between two
+   communicating peers; the only requirement from the underlying
+   transport is a reliable, in-order data stream.  Specifically, the
+   secure channel should provide the following properties:
+
+   -  Authentication: The server side of the channel is always
+      authenticated; the client side is optionally authenticated.
+      Authentication can happen via asymmetric cryptography (e.g., RSA
+      [RSA], the Elliptic Curve Digital Signature Algorithm (ECDSA)
+      [ECDSA], or the Edwards-Curve Digital Signature Algorithm (EdDSA)
+      [RFC8032]) or a symmetric pre-shared key (PSK).
+
+   -  Confidentiality: Data sent over the channel after establishment is
+      only visible to the endpoints.  TLS does not hide the length of
+      the data it transmits, though endpoints are able to pad TLS
+      records in order to obscure lengths and improve protection against
+      traffic analysis techniques.
+
+   -  Integrity: Data sent over the channel after establishment cannot
+      be modified by attackers without detection.
+
+   These properties should be true even in the face of an attacker who
+   has complete control of the network, as described in [RFC3552].  See
+   Appendix E for a more complete statement of the relevant security
+   properties.
+
+   TLS consists of two primary components:
+
+   -  A handshake protocol (Section 4) that authenticates the
+      communicating parties, negotiates cryptographic modes and
+      parameters, and establishes shared keying material.  The handshake
+      protocol is designed to resist tampering; an active attacker
+      should not be able to force the peers to negotiate different
+      parameters than they would if the connection were not under
+      attack.
+
+   -  A record protocol (Section 5) that uses the parameters established
+      by the handshake protocol to protect traffic between the
+      communicating peers.  The record protocol divides traffic up into
+      a series of records, each of which is independently protected
+      using the traffic keys.
+
+
+
+
+
+
+
+
+Rescorla                     Standards Track                    [Page 6]
+
+RFC 8446                           TLS                       August 2018
+
+
+   TLS is application protocol independent; higher-level protocols can
+   layer on top of TLS transparently.  The TLS standard, however, does
+   not specify how protocols add security with TLS; how to initiate TLS
+   handshaking and how to interpret the authentication certificates
+   exchanged are left to the judgment of the designers and implementors
+   of protocols that run on top of TLS.
+
+   This document defines TLS version 1.3.  While TLS 1.3 is not directly
+   compatible with previous versions, all versions of TLS incorporate a
+   versioning mechanism which allows clients and servers to
+   interoperably negotiate a common version if one is supported by both
+   peers.
+
+   This document supersedes and obsoletes previous versions of TLS,
+   including version 1.2 [RFC5246].  It also obsoletes the TLS ticket
+   mechanism defined in [RFC5077] and replaces it with the mechanism
+   defined in Section 2.2.  Because TLS 1.3 changes the way keys are
+   derived, it updates [RFC5705] as described in Section 7.5.  It also
+   changes how Online Certificate Status Protocol (OCSP) messages are
+   carried and therefore updates [RFC6066] and obsoletes [RFC6961] as
+   described in Section 4.4.2.1.
+
+1.1.  Conventions and Terminology
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in
+   BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+   The following terms are used:
+
+   client:  The endpoint initiating the TLS connection.
+
+   connection:  A transport-layer connection between two endpoints.
+
+   endpoint:  Either the client or server of the connection.
+
+   handshake:  An initial negotiation between client and server that
+      establishes the parameters of their subsequent interactions
+      within TLS.
+
+   peer:  An endpoint.  When discussing a particular endpoint, "peer"
+      refers to the endpoint that is not the primary subject of
+      discussion.
+
+
+
+
+
+
+Rescorla                     Standards Track                    [Page 7]
+
+RFC 8446                           TLS                       August 2018
+
+
+   receiver:  An endpoint that is receiving records.
+
+   sender:  An endpoint that is transmitting records.
+
+   server:  The endpoint that did not initiate the TLS connection.
+
+1.2.  Major Differences from TLS 1.2
+
+   The following is a list of the major functional differences between
+   TLS 1.2 and TLS 1.3.  It is not intended to be exhaustive, and there
+   are many minor differences.
+
+   -  The list of supported symmetric encryption algorithms has been
+      pruned of all algorithms that are considered legacy.  Those that
+      remain are all Authenticated Encryption with Associated Data
+      (AEAD) algorithms.  The cipher suite concept has been changed to
+      separate the authentication and key exchange mechanisms from the
+      record protection algorithm (including secret key length) and a
+      hash to be used with both the key derivation function and
+      handshake message authentication code (MAC).
+
+   -  A zero round-trip time (0-RTT) mode was added, saving a round trip
+      at connection setup for some application data, at the cost of
+      certain security properties.
+
+   -  Static RSA and Diffie-Hellman cipher suites have been removed; all
+      public-key based key exchange mechanisms now provide forward
+      secrecy.
+
+   -  All handshake messages after the ServerHello are now encrypted.
+      The newly introduced EncryptedExtensions message allows various
+      extensions previously sent in the clear in the ServerHello to also
+      enjoy confidentiality protection.
+
+   -  The key derivation functions have been redesigned.  The new design
+      allows easier analysis by cryptographers due to their improved key
+      separation properties.  The HMAC-based Extract-and-Expand Key
+      Derivation Function (HKDF) is used as an underlying primitive.
+
+   -  The handshake state machine has been significantly restructured to
+      be more consistent and to remove superfluous messages such as
+      ChangeCipherSpec (except when needed for middlebox compatibility).
+
+   -  Elliptic curve algorithms are now in the base spec, and new
+      signature algorithms, such as EdDSA, are included.  TLS 1.3
+      removed point format negotiation in favor of a single point format
+      for each curve.
+
+
+
+
+Rescorla                     Standards Track                    [Page 8]
+
+RFC 8446                           TLS                       August 2018
+
+
+   -  Other cryptographic improvements were made, including changing the
+      RSA padding to use the RSA Probabilistic Signature Scheme
+      (RSASSA-PSS), and the removal of compression, the Digital
+      Signature Algorithm (DSA), and custom Ephemeral Diffie-Hellman
+      (DHE) groups.
+
+   -  The TLS 1.2 version negotiation mechanism has been deprecated in
+      favor of a version list in an extension.  This increases
+      compatibility with existing servers that incorrectly implemented
+      version negotiation.
+
+   -  Session resumption with and without server-side state as well as
+      the PSK-based cipher suites of earlier TLS versions have been
+      replaced by a single new PSK exchange.
+
+   -  References have been updated to point to the updated versions of
+      RFCs, as appropriate (e.g., RFC 5280 rather than RFC 3280).
+
+1.3.  Updates Affecting TLS 1.2
+
+   This document defines several changes that optionally affect
+   implementations of TLS 1.2, including those which do not also support
+   TLS 1.3:
+
+   -  A version downgrade protection mechanism is described in
+      Section 4.1.3.
+
+   -  RSASSA-PSS signature schemes are defined in Section 4.2.3.
+
+   -  The "supported_versions" ClientHello extension can be used to
+      negotiate the version of TLS to use, in preference to the
+      legacy_version field of the ClientHello.
+
+   -  The "signature_algorithms_cert" extension allows a client to
+      indicate which signature algorithms it can validate in X.509
+      certificates.
+
+   Additionally, this document clarifies some compliance requirements
+   for earlier versions of TLS; see Section 9.3.
+
+
+
+
+
+
+
+
+
+
+
+
+Rescorla                     Standards Track                    [Page 9]
+
+RFC 8446                           TLS                       August 2018
+
+
+2.  Protocol Overview
+
+   The cryptographic parameters used by the secure channel are produced
+   by the TLS handshake protocol.  This sub-protocol of TLS is used by
+   the client and server when first communicating with each other.  The
+   handshake protocol allows peers to negotiate a protocol version,
+   select cryptographic algorithms, optionally authenticate each other,
+   and establish shared secret keying material.  Once the handshake is
+   complete, the peers use the established keys to protect the
+   application-layer traffic.
+
+   A failure of the handshake or other protocol error triggers the
+   termination of the connection, optionally preceded by an alert
+   message (Section 6).
+
+   TLS supports three basic key exchange modes:
+
+   -  (EC)DHE (Diffie-Hellman over either finite fields or elliptic
+      curves)
+
+   -  PSK-only
+
+   -  PSK with (EC)DHE
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Rescorla                     Standards Track                   [Page 10]
+
+RFC 8446                           TLS                       August 2018
+
+
+   Figure 1 below shows the basic full TLS handshake:
+
+       Client                                           Server
+
+Key  ^ ClientHello
+Exch | + key_share*
+     | + signature_algorithms*
+     | + psk_key_exchange_modes*
+     v + pre_shared_key*       -------->
+                                                  ServerHello  ^ Key
+                                                 + key_share*  | Exch
+                                            + pre_shared_key*  v
+                                        {EncryptedExtensions}  ^  Server
+                                        {CertificateRequest*}  v  Params
+                                               {Certificate*}  ^
+                                         {CertificateVerify*}  | Auth
+                                                   {Finished}  v
+                               <--------  [Application Data*]
+     ^ {Certificate*}
+Auth | {CertificateVerify*}
+     v {Finished}              -------->
+       [Application Data]      <------->  [Application Data]
+
+              +  Indicates noteworthy extensions sent in the
+                 previously noted message.
+
+              *  Indicates optional or situation-dependent
+                 messages/extensions that are not always sent.
+
+              {} Indicates messages protected using keys
+                 derived from a [sender]_handshake_traffic_secret.
+
+              [] Indicates messages protected using keys
+                 derived from [sender]_application_traffic_secret_N.
+
+               Figure 1: Message Flow for Full TLS Handshake
+
+   The handshake can be thought of as having three phases (indicated in
+   the diagram above):
+
+   -  Key Exchange: Establish shared keying material and select the
+      cryptographic parameters.  Everything after this phase is
+      encrypted.
+
+   -  Server Parameters: Establish other handshake parameters
+      (whether the client is authenticated, application-layer protocol
+      support, etc.).
+
+
+
+
+Rescorla                     Standards Track                   [Page 11]
+
+RFC 8446                           TLS                       August 2018
+
+
+   -  Authentication: Authenticate the server (and, optionally, the
+      client) and provide key confirmation and handshake integrity.
+
+   In the Key Exchange phase, the client sends the ClientHello
+   (Section 4.1.2) message, which contains a random nonce
+   (ClientHello.random); its offered protocol versions; a list of
+   symmetric cipher/HKDF hash pairs; either a set of Diffie-Hellman key
+   shares (in the "key_share" (Section 4.2.8) extension), a set of
+   pre-shared key labels (in the "pre_shared_key" (Section 4.2.11)
+   extension), or both; and potentially additional extensions.
+   Additional fields and/or messages may also be present for middlebox
+   compatibility.
+
+   The server processes the ClientHello and determines the appropriate
+   cryptographic parameters for the connection.  It then responds with
+   its own ServerHello (Section 4.1.3), which indicates the negotiated
+   connection parameters.  The combination of the ClientHello and the
+   ServerHello determines the shared keys.  If (EC)DHE key establishment
+   is in use, then the ServerHello contains a "key_share" extension with
+   the server's ephemeral Diffie-Hellman share; the server's share MUST
+   be in the same group as one of the client's shares.  If PSK key
+   establishment is in use, then the ServerHello contains a
+   "pre_shared_key" extension indicating which of the client's offered
+   PSKs was selected.  Note that implementations can use (EC)DHE and PSK
+   together, in which case both extensions will be supplied.
+
+   The server then sends two messages to establish the Server
+   Parameters:
+
+   EncryptedExtensions:  responses to ClientHello extensions that are
+      not required to determine the cryptographic parameters, other than
+      those that are specific to individual certificates.
+      [Section 4.3.1]
+
+   CertificateRequest:  if certificate-based client authentication is
+      desired, the desired parameters for that certificate.  This
+      message is omitted if client authentication is not desired.
+      [Section 4.3.2]
+
+
+
+
+
+
+
+
+
+
+
+
+
+Rescorla                     Standards Track                   [Page 12]
+
+RFC 8446                           TLS                       August 2018
+
+
+   Finally, the client and server exchange Authentication messages.  TLS
+   uses the same set of messages every time that certificate-based
+   authentication is needed.  (PSK-based authentication happens as a
+   side effect of key exchange.)  Specifically:
+
+   Certificate:  The certificate of the endpoint and any per-certificate
+      extensions.  This message is omitted by the server if not
+      authenticating with a certificate and by the client if the server
+      did not send CertificateRequest (thus indicating that the client
+      should not authenticate with a certificate).  Note that if raw
+      public keys [RFC7250] or the cached information extension
+      [RFC7924] are in use, then this message will not contain a
+      certificate but rather some other value corresponding to the
+      server's long-term key.  [Section 4.4.2]
+
+   CertificateVerify:  A signature over the entire handshake using the
+      private key corresponding to the public key in the Certificate
+      message.  This message is omitted if the endpoint is not
+      authenticating via a certificate.  [Section 4.4.3]
+
+   Finished:  A MAC (Message Authentication Code) over the entire
+      handshake.  This message provides key confirmation, binds the
+      endpoint's identity to the exchanged keys, and in PSK mode also
+      authenticates the handshake.  [Section 4.4.4]
+
+   Upon receiving the server's messages, the client responds with its
+   Authentication messages, namely Certificate and CertificateVerify (if
+   requested), and Finished.
+
+   At this point, the handshake is complete, and the client and server
+   derive the keying material required by the record layer to exchange
+   application-layer data protected through authenticated encryption.
+   Application Data MUST NOT be sent prior to sending the Finished
+   message, except as specified in Section 2.3.  Note that while the
+   server may send Application Data prior to receiving the client's
+   Authentication messages, any data sent at that point is, of course,
+   being sent to an unauthenticated peer.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Rescorla                     Standards Track                   [Page 13]
+
+RFC 8446                           TLS                       August 2018
+
+
+2.1.  Incorrect DHE Share
+
+   If the client has not provided a sufficient "key_share" extension
+   (e.g., it includes only DHE or ECDHE groups unacceptable to or
+   unsupported by the server), the server corrects the mismatch with a
+   HelloRetryRequest and the client needs to restart the handshake with
+   an appropriate "key_share" extension, as shown in Figure 2.  If no
+   common cryptographic parameters can be negotiated, the server MUST
+   abort the handshake with an appropriate alert.
+
+        Client                                               Server
+
+        ClientHello
+        + key_share             -------->
+                                                  HelloRetryRequest
+                                <--------               + key_share
+        ClientHello
+        + key_share             -------->
+                                                        ServerHello
+                                                        + key_share
+                                              {EncryptedExtensions}
+                                              {CertificateRequest*}
+                                                     {Certificate*}
+   

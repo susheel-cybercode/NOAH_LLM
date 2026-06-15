@@ -1,0 +1,474 @@
+{
+    "type": "bundle",
+    "id": "bundle--6a1237ca-4d75-413b-90d1-afacde81fed0",
+    "objects": [
+        {
+            "type": "x-mitre-matrix",
+            "id": "x-mitre-matrix--eafc1b4c-5e56-4965-bd4e-66a6a89c88cc",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "revoked": false,
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/matrices/enterprise",
+                    "external_id": "enterprise-attack"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2026-04-14T22:56:22.555Z",
+            "name": "Enterprise ATT&CK",
+            "description": "Below are the tactics and techniques representing the MITRE ATT&CK Matrix for Enterprise. The Matrix contains information for the following platforms: Windows, macOS, Linux, PRE, Office Suite, Identity Provider, SaaS, IaaS, Network Devices, Containers, ESXi.",
+            "tactic_refs": [
+                "x-mitre-tactic--daa4cbb1-b4f4-4723-a824-7f1efd6e0592",
+                "x-mitre-tactic--d679bca2-e57d-4935-8650-8031c87a4400",
+                "x-mitre-tactic--ffd5bcee-6e16-4dd2-8eca-7b3beedf33ca",
+                "x-mitre-tactic--4ca45d45-df4d-4613-8980-bac22d278fa5",
+                "x-mitre-tactic--5bc1d813-693e-4823-9961-abf9af4b0e92",
+                "x-mitre-tactic--5e29b093-294e-49e9-a803-dab3d73b77dd",
+                "x-mitre-tactic--78b23412-0651-46d7-a540-170a1ce8bd5a",
+                "x-mitre-tactic--43c49635-f2fa-44f2-92b9-0ee980bbf4ef",
+                "x-mitre-tactic--2558fd61-8c75-4730-94c4-11926db2a263",
+                "x-mitre-tactic--c17c5845-175e-4421-9713-829d0573dbc9",
+                "x-mitre-tactic--7141578b-e50b-4dcc-bfa4-08a8dd689e9e",
+                "x-mitre-tactic--d108ce10-2419-4cf9-a774-46161d6c6cfe",
+                "x-mitre-tactic--f72804c5-f15a-449e-a5da-2eecd181f813",
+                "x-mitre-tactic--9a4e74ab-5008-408c-84bf-a10dfbc53462",
+                "x-mitre-tactic--5569339b-94c2-49ee-afb3-2222936582c8"
+            ],
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": false,
+            "x_mitre_version": "2.0",
+            "x_mitre_attack_spec_version": "3.3.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--00d7d21b-69d6-4797-88a2-c86f3fc97651",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1174",
+                    "external_id": "T1174"
+                },
+                {
+                    "source_name": "Microsoft Install Password Filter n.d",
+                    "description": "Microsoft. (n.d.). Installing and Registering a Password Filter DLL. Retrieved November 21, 2017.",
+                    "url": "https://msdn.microsoft.com/library/windows/desktop/ms721766.aspx"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:39.912Z",
+            "name": "Password Filter DLL Mitigation",
+            "description": "Ensure only valid password filters are registered. Filter DLLs must be present in Windows installation directory (<code>C:\\Windows\\System32\\</code> by default) of a domain controller and/or local computer with a corresponding entry in <code>HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Lsa\\Notification Packages</code>. (Citation: Microsoft Install Password Filter n.d)",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--02f0f92a-0a51-4c94-9bda-6437b9a93f22",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1151",
+                    "external_id": "T1151"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:40.127Z",
+            "name": "Space after Filename Mitigation",
+            "description": "Prevent files from having a trailing space after the extension.",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--03c0c586-50ed-45a7-95f4-f496d7eb5330",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1148",
+                    "external_id": "T1148"
+                },
+                {
+                    "source_name": "Securing bash history",
+                    "description": "Mathew Branwell. (2012, March 21). Securing .bash_history file. Retrieved July 8, 2017.",
+                    "url": "http://www.akyl.net/securing-bashhistory-file-make-sure-your-linux-system-users-won%E2%80%99t-hide-or-delete-their-bashhistory"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:40.291Z",
+            "name": "HISTCONTROL Mitigation",
+            "description": "Prevent users from changing the <code>HISTCONTROL</code> environment variable (Citation: Securing bash history). Also, make sure that the <code>HISTCONTROL</code> environment variable is set to \u201cignoredup\u201d instead of \u201cignoreboth\u201d or \u201cignorespace\u201d.",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--0472af99-f25c-4abe-9fce-010fa3450e72",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1081",
+                    "external_id": "T1081"
+                },
+                {
+                    "source_name": "Microsoft MS14-025",
+                    "description": "Microsoft. (2014, May 13). MS14-025: Vulnerability in Group Policy Preferences could allow elevation of privilege. Retrieved January 28, 2015.",
+                    "url": "http://support.microsoft.com/kb/2962486"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:40.502Z",
+            "name": "Credentials in Files Mitigation",
+            "description": "Establish an organizational policy that prohibits password storage in files. Ensure that developers and system administrators are aware of the risk associated with having plaintext passwords in software configuration files that may be left on endpoint systems or servers. Preemptively search for files containing passwords and remove when found. Restrict file shares to specific directories with access only to necessary users. Remove vulnerable Group Policy Preferences. (Citation: Microsoft MS14-025)",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--06160d81-62be-46e5-aa37-4b9c645ffa31",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1212",
+                    "external_id": "T1212"
+                },
+                {
+                    "source_name": "Ars Technica Pwn2Own 2017 VM Escape",
+                    "description": "Goodin, D. (2017, March 17). Virtual machine escape fetches $105,000 at Pwn2Own hacking contest - updated. Retrieved March 12, 2018.",
+                    "url": "https://arstechnica.com/information-technology/2017/03/hack-that-escapes-vm-by-exploiting-edge-browser-fetches-105000-at-pwn2own/"
+                },
+                {
+                    "source_name": "TechNet Moving Beyond EMET",
+                    "description": "Nunez, N. (2017, August 9). Moving Beyond EMET II \u2013 Windows Defender Exploit Guard. Retrieved March 12, 2018.",
+                    "url": "https://blogs.technet.microsoft.com/srd/2017/08/09/moving-beyond-emet-ii-windows-defender-exploit-guard/"
+                },
+                {
+                    "source_name": "Wikipedia Control Flow Integrity",
+                    "description": "Wikipedia. (2018, January 11). Control-flow integrity. Retrieved March 12, 2018.",
+                    "url": "https://en.wikipedia.org/wiki/Control-flow_integrity"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:40.671Z",
+            "name": "Exploitation for Credential Access Mitigation",
+            "description": "Update software regularly by employing patch management for internal enterprise endpoints and servers. Develop a robust cyber threat intelligence capability to determine what types and levels of threat may use software exploits and 0-days against a particular organization. Make it difficult for adversaries to advance their operation through exploitation of undiscovered or unpatched vulnerabilities by using sandboxing, if available. Other types of virtualization and application microsegmentation may also mitigate the impact of some types of exploitation. The risks of additional exploits and weaknesses in implementation may still exist. (Citation: Ars Technica Pwn2Own 2017 VM Escape)\n\nSecurity applications that look for behavior used during exploitation such as Windows Defender Exploit Guard (WDEG) and the Enhanced Mitigation Experience Toolkit (EMET) can be used to mitigate some exploitation behavior. (Citation: TechNet Moving Beyond EMET) Control flow integrity checking is another way to potentially identify and stop a software exploit from occurring. (Citation: Wikipedia Control Flow Integrity) Many of these protections depend on the architecture and target application binary for compatibility and may not work for software targeted for defense evasion.",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--0640214c-95af-4c04-a574-2a1ba6dda00b",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1012",
+                    "external_id": "T1012"
+                },
+                {
+                    "source_name": "Beechey 2010",
+                    "description": "Beechey, J. (2010, December). Application Whitelisting: Panacea or Propaganda?. Retrieved November 18, 2014.",
+                    "url": "http://www.sans.org/reading-room/whitepapers/application/application-whitelisting-panacea-propaganda-33599"
+                },
+                {
+                    "source_name": "Windows Commands JPCERT",
+                    "description": "Tomonaga, S. (2016, January 26). Windows Commands Abused by Attackers. Retrieved February 2, 2016.",
+                    "url": "http://blog.jpcert.or.jp/2016/01/windows-commands-abused-by-attackers.html"
+                },
+                {
+                    "source_name": "NSA MS AppLocker",
+                    "description": "NSA Information Assurance Directorate. (2014, August). Application Whitelisting Using Microsoft AppLocker. Retrieved March 31, 2016.",
+                    "url": "https://apps.nsa.gov/iaarchive/library/ia-guidance/tech-briefs/application-whitelisting-using-microsoft-applocker.cfm"
+                },
+                {
+                    "source_name": "Corio 2008",
+                    "description": "Corio, C., & Sayana, D. P. (2008, June). Application Lockdown with Software Restriction Policies. Retrieved November 18, 2014.",
+                    "url": "http://technet.microsoft.com/en-us/magazine/2008.06.srp.aspx"
+                },
+                {
+                    "source_name": "TechNet Applocker vs SRP",
+                    "description": "Microsoft. (2012, June 27). Using Software Restriction Policies and AppLocker Policies. Retrieved April 7, 2016.",
+                    "url": "https://technet.microsoft.com/en-us/library/ee791851.aspx"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:40.840Z",
+            "name": "Query Registry Mitigation",
+            "description": "Identify unnecessary system utilities or potentially malicious software that may be used to acquire information within the Registry, and audit and/or block them by using whitelisting (Citation: Beechey 2010) tools, like AppLocker, (Citation: Windows Commands JPCERT) (Citation: NSA MS AppLocker) or Software Restriction Policies (Citation: Corio 2008) where appropriate. (Citation: TechNet Applocker vs SRP)",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--06824aa2-94a5-474c-97f6-57c2e983d885",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1162",
+                    "external_id": "T1162"
+                },
+                {
+                    "source_name": "Re-Open windows on Mac",
+                    "description": "Apple. (2016, December 6). Automatically re-open windows, apps, and documents on your Mac. Retrieved July 11, 2017.",
+                    "url": "https://support.apple.com/en-us/HT204005"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:41.043Z",
+            "name": "Login Item Mitigation",
+            "description": "Restrict users from being able to create their own login items. Additionally, holding the shift key during login prevents apps from opening automatically (Citation: Re-Open windows on Mac).",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--073cc04d-ac46-4f5a-85d7-83a91ecd6a19",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1166",
+                    "external_id": "T1166"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:41.210Z",
+            "name": "Setuid and Setgid Mitigation",
+            "description": "Applications with known vulnerabilities or known shell escapes should not have the setuid or setgid bits set to reduce potential damage if an application is compromised. Additionally, the number of programs with setuid or setgid bits set should be minimized across a system.",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--08e02f67-ea09-4f77-a70b-414963c29fc2",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1223",
+                    "external_id": "T1223"
+                },
+                {
+                    "source_name": "PaloAlto Preventing Opportunistic Attacks Apr 2016",
+                    "description": "Kiwi. (2016, April 6). Breakout Recap: Cybersecurity Best Practices Part 1 - Preventing Opportunistic Attacks. Retrieved October 3, 2018.",
+                    "url": "https://live.paloaltonetworks.com/t5/Ignite-2016-Blog/Breakout-Recap-Cybersecurity-Best-Practices-Part-1-Preventing/ba-p/75913"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:41.389Z",
+            "name": "Compiled HTML File Mitigation",
+            "description": "Consider blocking download/transfer and execution of potentially uncommon file types known to be used in adversary campaigns, such as CHM files. (Citation: PaloAlto Preventing Opportunistic Attacks Apr 2016) Also consider using application whitelisting to prevent execution of hh.exe if it is not required for a given system or network to prevent potential misuse by adversaries.",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--0b3ee33e-430b-476f-9525-72d120c90f8d",
+            "created": "2019-03-14T20:17:16.234Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1488",
+                    "external_id": "T1488"
+                },
+                {
+                    "source_name": "Ready.gov IT DRP",
+                    "description": "Ready.gov. (n.d.). IT Disaster Recovery Plan. Retrieved March 15, 2019.",
+                    "url": "https://www.ready.gov/business/implementation/IT"
+                },
+                {
+                    "source_name": "Beechey 2010",
+                    "description": "Beechey, J. (2010, December). Application Whitelisting: Panacea or Propaganda?. Retrieved November 18, 2014.",
+                    "url": "http://www.sans.org/reading-room/whitepapers/application/application-whitelisting-panacea-propaganda-33599"
+                },
+                {
+                    "source_name": "Windows Commands JPCERT",
+                    "description": "Tomonaga, S. (2016, January 26). Windows Commands Abused by Attackers. Retrieved February 2, 2016.",
+                    "url": "https://blogs.jpcert.or.jp/en/2016/01/windows-commands-abused-by-attackers.html"
+                },
+                {
+                    "source_name": "NSA MS AppLocker",
+                    "description": "NSA Information Assurance Directorate. (2014, August). Application Whitelisting Using Microsoft AppLocker. Retrieved March 31, 2016.",
+                    "url": "https://apps.nsa.gov/iaarchive/library/ia-guidance/tech-briefs/application-whitelisting-using-microsoft-applocker.cfm"
+                },
+                {
+                    "source_name": "Corio 2008",
+                    "description": "Corio, C., & Sayana, D. P. (2008, June). Application Lockdown with Software Restriction Policies. Retrieved November 18, 2014.",
+                    "url": "http://technet.microsoft.com/en-us/magazine/2008.06.srp.aspx"
+                },
+                {
+                    "source_name": "TechNet Applocker vs SRP",
+                    "description": "Microsoft. (2012, June 27). Using Software Restriction Policies and AppLocker Policies. Retrieved April 7, 2016.",
+                    "url": "https://technet.microsoft.com/en-us/library/ee791851.aspx"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:41.583Z",
+            "name": "Data Destruction Mitigation",
+            "description": "Consider implementing IT disaster recovery plans that contain procedures for taking regular data backups that can be used to restore organizational data.(Citation: Ready.gov IT DRP) Ensure backups are stored off system and is protected from common methods adversaries may use to gain access and destroy the backups to prevent recovery.\n\nIdentify potentially malicious software and audit and/or block it by using whitelisting(Citation: Beechey 2010) tools, like AppLocker,(Citation: Windows Commands JPCERT)(Citation: NSA MS AppLocker) or Software Restriction Policies(Citation: Corio 2008) where appropriate.(Citation: TechNet Applocker vs SRP)",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--0bc3ce00-83bc-4a92-a042-79ffbc6af259",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1084",
+                    "external_id": "T1084"
+                },
+                {
+                    "source_name": "FireEye WMI 2015",
+                    "description": "Ballenthin, W., et al. (2015). Windows Management Instrumentation (WMI) Offense, Defense, and Forensics. Retrieved March 30, 2016.",
+                    "url": "https://www.fireeye.com/content/dam/fireeye-www/global/en/current-threats/pdfs/wp-windows-management-instrumentation.pdf"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:41.767Z",
+            "name": "Windows Management Instrumentation Event Subscription Mitigation",
+            "description": "Disabling WMI services may cause system instability and should be evaluated to assess the impact to a network. By default, only administrators are allowed to connect remotely using WMI; restrict other users that are allowed to connect, or disallow all users from connecting remotely to WMI. Prevent credential overlap across systems of administrator and privileged accounts. (Citation: FireEye WMI 2015)",
+            "x_mitre_modified_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "x_mitre_deprecated": true,
+            "x_mitre_domains": [
+                "enterprise-attack"
+            ],
+            "x_mitre_version": "1.0",
+            "x_mitre_attack_spec_version": "3.2.0"
+        },
+        {
+            "type": "course-of-action",
+            "id": "course-of-action--1022138b-497c-40e6-b53a-13351cbd4090",
+            "created": "2018-10-17T00:14:20.652Z",
+            "created_by_ref": "identity--c78cb6e5-0c4b-4611-8297-d1b8b55e40b5",
+            "external_references": [
+                {
+                    "source_name": "mitre-attack",
+                    "url": "https://attack.mitre.org/mitigations/T1044",
+                    "external_id": "T1044"
+                },
+                {
+                    "source_name": "Powersploit",
+                    "description": "PowerSploit. (n.d.). Retrieved December 4, 2014.",
+                    "url": "https://github.com/mattifestation/PowerSploit"
+                },
+                {
+                    "source_name": "Beechey 2010",
+                    "description": "Beechey, J. (2010, December). Application Whitelisting: Panacea or Propaganda?. Retrieved November 18, 2014.",
+                    "url": "http://www.sans.org/reading-room/whitepapers/application/application-whitelisting-panacea-propaganda-33599"
+                },
+                {
+                    "source_name": "Windows Commands JPCERT",
+                    "description": "Tomonaga, S. (2016, January 26). Windows Commands Abused by Attackers. Retrieved February 2, 2016.",
+                    "url": "https://blogs.jpcert.or.jp/en/2016/01/windows-commands-abused-by-attackers.html"
+                },
+                {
+                    "source_name": "NSA MS AppLocker",
+                    "description": "NSA Information Assurance Directorate. (2014, August). Application Whitelisting Using Microsoft AppLocker. Retrieved March 31, 2016.",
+                    "url": "https://apps.nsa.gov/iaarchive/library/ia-guidance/tech-briefs/application-whitelisting-using-microsoft-applocker.cfm"
+                },
+                {
+                    "source_name": "Seclists Kanthak 7zip Installer",
+                    "description": "Kanthak, S. (2015, December 8). Executable installers are vulnerable^WEVIL (case 7): 7z*.exe\tallows remote code execution with escalation of privilege. Retrieved March 10, 2017.",
+                    "url": "http://seclists.org/fulldisclosure/2015/Dec/34"
+                }
+            ],
+            "object_marking_refs": [
+                "marking-definition--fa42a846-8d90-4e51-bc29-71d5b4802168"
+            ],
+            "modified": "2025-04-18T17:59:41.940Z",
+            "name": "File System Permissions Weakness Mitigation",
+            "description": "Use auditing tools capable of detecting file system permissions abuse opportunities on systems within an enterprise and correct them. Limit privileges of user accounts and groups so that only authorized administrators can interact with service changes and service binary target path locations. Toolkits like the PowerSploit framework contain PowerUp modules that can be used to explore systems for service file system permissions weaknesses. (Citation: Powersploit)\n\nIdentify and block potentially malicious software that may be executed through abuse of file, directory, and service permissions by using whitelisting (Citation: Beechey 2010) tools, like AppLocker, (Citation: Windows Commands JPCERT) (Citation: NSA MS AppLocker) that are capable of auditing and/or blocking unknown programs. Deny execution from user directories such as fil

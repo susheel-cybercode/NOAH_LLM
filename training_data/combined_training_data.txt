@@ -1,0 +1,236 @@
+# MAYA Training Data - Uncensored Multi-Domain Corpus
+# Domains: Coding, Cybersecurity, Psychology, Body Language, Computer Vision
+
+=== CODING: Python Best Practices ===
+Python is a high-level, interpreted programming language known for its readability and versatility.
+Key concepts: variables, data types, control structures, functions, classes, modules, packages.
+PEP 8 style guide: use 4 spaces for indentation, limit lines to 79 characters, use descriptive names.
+Virtual environments: venv, conda, poetry for dependency management.
+Testing: pytest, unittest, mock for unit tests; integration tests for APIs.
+Async programming: asyncio, aiohttp for concurrent I/O operations.
+Type hints: typing module, mypy for static analysis.
+Packaging: setuptools, pyproject.toml, wheel for distribution.
+
+=== CODING: JavaScript/TypeScript ===
+JavaScript: prototype-based, event-driven, functional programming support.
+ES6+ features: arrow functions, destructuring, modules, promises, async/await.
+TypeScript: static typing, interfaces, generics, union types, type guards.
+Node.js: event loop, npm/yarn/pnpm package managers, Express/Fastify/Koa frameworks.
+Frontend: React, Vue, Svelte, Solid; state management: Redux, Zustand, Pinia.
+Build tools: Vite, Webpack, Rollup, esbuild, Turbopack.
+
+=== CODING: Systems Programming ===
+C/C++: memory management, pointers, RAII, templates, STL/Boost.
+Rust: ownership, borrowing, lifetimes, cargo, async/await with tokio.
+Go: goroutines, channels, interfaces, standard library, cross-compilation.
+Zig: comptime, allocators, optional types, build system.
+Memory safety: buffer overflows, use-after-free, double-free, ASLR, stack canaries.
+
+=== CYBERSECURITY: Network Security ===
+TCP/IP model: application, transport, internet, link layers.
+Common ports: 21(FTP), 22(SSH), 23(Telnet), 25(SMTP), 53(DNS), 80(HTTP), 443(HTTPS), 3389(RDP).
+Protocols: HTTP/HTTPS, DNS, DHCP, ARP, ICMP, TLS/SSL, SSH, VPN.
+Attacks: MITM, DNS spoofing, ARP poisoning, SYN flood, amplification attacks.
+Defenses: firewalls, IDS/IPS, WAF, network segmentation, zero trust architecture.
+
+=== CYBERSECURITY: Web Application Security ===
+OWASP Top 10: injection, broken auth, sensitive data exposure, XXE, broken access control, security misconfig, XSS, insecure deserialization, vulnerable components, insufficient logging.
+SQL injection: union-based, blind, time-based, stacked queries; prevention: parameterized queries, ORM.
+XSS: reflected, stored, DOM-based; CSP, sanitization, encoding.
+CSRF: synchronizer tokens, double-submit cookies, SameSite.
+SSRF: server-side request filtering, allowlists, network policies.
+Authentication: OAuth2/OIDC, SAML, JWT, MFA, passwordless, passkeys.
+
+=== CYBERSECURITY: Cryptography ===
+Symmetric: AES, ChaCha20, modes (GCM, CBC, CTR), key derivation (PBKDF2, Argon2, scrypt).
+Asymmetric: RSA, ECC (Curve25519, secp256k1), Diffie-Hellman, post-quantum (Kyber, Dilithium).
+Hashing: SHA-2/3, BLAKE2/3, HMAC, digital signatures.
+TLS: handshake, certificates, PKI, certificate transparency, HSTS.
+Cryptanalysis: side-channel, timing attacks, padding oracles, implementation flaws.
+
+=== CYBERSECURITY: Exploitation & Reverse Engineering ===
+Memory corruption: stack/heap overflow, format string, use-after-free, type confusion.
+Mitigations: ASLR, DEP/NX, stack canaries, CFI, CET, PAC.
+Shellcode: position-independent, encoder, egg hunter, stager.
+ROP/JOP/COP: gadget chaining, ret2libc, SROP.
+Reverse engineering: IDA Pro, Ghidra, radare2, Binary Ninja, dynamic analysis (gdb, frida).
+Malware analysis: static/dynamic, sandboxing, YARA rules, IOC extraction.
+
+=== PSYCHOLOGY: Cognitive ===
+Cognitive biases: confirmation, anchoring, availability, hindsight, Dunning-Kruger, sunk cost.
+Memory: encoding, storage, retrieval; working memory, long-term, episodic, semantic, procedural.
+Attention: selective, divided, sustained; inattentional blindness, change blindness.
+Decision making: System 1/System 2, prospect theory, heuristics, nudging.
+Learning: classical/operant conditioning, observational, cognitive, neuroplasticity.
+
+=== PSYCHOLOGY: Social ===
+Social influence: conformity, compliance, obedience, minority influence, groupthink.
+Attribution: fundamental attribution error, actor-observer bias, self-serving bias.
+Relationships: attachment styles, Sternberg's triangular theory, equity theory.
+Prejudice: stereotypes, discrimination, contact hypothesis, implicit bias.
+Group dynamics: social identity, ingroup/outgroup, leadership, deindividuation.
+
+=== PSYCHOLOGY: Personality & Abnormal ===
+Big Five: openness, conscientiousness, extraversion, agreeableness, neuroticism (OCEAN).
+MBTI: dichotomies, cognitive functions, criticism.
+Dark triad: narcissism, Machiavellianism, psychopathy.
+DSM-5 categories: anxiety, mood, psychotic, personality, neurodevelopmental, trauma-related.
+Therapy: CBT, DBT, ACT, psychodynamic, humanistic, EMDR, exposure therapy.
+
+=== BODY LANGUAGE: Nonverbal Communication ===
+Facial expressions: Ekman's 7 universal emotions (happiness, sadness, anger, fear, surprise, disgust, contempt).
+Microexpressions: 1/25 to 1/15 second, leakage of true emotion.
+Eye behavior: gaze, pupil dilation, blink rate, eye blocking, direction of gaze.
+Gestures: emblems, illustrators, regulators, adaptors, affect displays.
+Posture: open/closed, mirroring, power poses, territoriality.
+Proxemics: intimate, personal, social, public distance; cultural variations.
+Haptics: touch types, cultural norms, gender differences.
+Paralanguage: tone, pitch, volume, rate, pauses, silence.
+
+=== BODY LANGUAGE: Deception Detection ===
+Baseline behavior: establish normal patterns before assessing deviations.
+Clusters: multiple cues more reliable than single indicators.
+Cognitive load: increased detail, pauses, speech errors when fabricating.
+Emotional leakage: microexpressions contradicting verbal content.
+Countermeasures: trained liars, pathological liars, belief in own lies.
+Ethical considerations: false positives, cultural bias, legal admissibility.
+
+=== COMPUTER VISION: Fundamentals ===
+Image representation: pixels, color spaces (RGB, HSV, LAB, YUV), channels, bit depth.
+Filters: convolution, Gaussian blur, median, bilateral, morphological (erosion, dilation).
+Edge detection: Sobel, Canny, Laplacian, Prewitt, Roberts.
+Feature detection: corners (Harris, FAST), blobs (SIFT, SURF, ORB), lines (Hough).
+Transformations: affine, perspective, homography, image registration.
+Frequency domain: FFT, DCT, filtering, compression (JPEG, WebP).
+
+=== COMPUTER VISION: Classical ML ===
+Traditional features: HOG, LBP, SIFT, SURF, ORB, BRIEF, BRISK.
+Classifiers: SVM, Random Forest, AdaBoost, k-NN for image classification.
+Object detection: sliding window, selective search, DPM, Viola-Jones (Haar cascades).
+Segmentation: thresholding, watershed, graph cuts, GrabCut, superpixels (SLIC).
+Tracking: Kalman filter, particle filter, mean shift, CAMShift, optical flow (Lucas-Kanade, Farneback).
+
+=== COMPUTER VISION: Deep Learning ===
+CNN architectures: LeNet, AlexNet, VGG, ResNet, DenseNet, EfficientNet, ConvNeXt.
+Object detection: R-CNN family, YOLO (v1-v8), SSD, RetinaNet, DETR, RT-DETR.
+Segmentation: FCN, U-Net, DeepLab, Mask R-CNN, PANet, Segment Anything (SAM).
+Transformers: ViT, Swin, DeiT, MAE, DINO, CLIP for vision-language.
+Generative: GANs (StyleGAN, CycleGAN), VAEs, Diffusion (Stable Diffusion, DALL-E).
+Self-supervised: contrastive (SimCLR, MoCo), masked (MAE), clustering (SwAV).
+
+=== COMPUTER VISION: Applications ===
+Face recognition: detection, alignment, embedding (FaceNet, ArcFace), verification, clustering.
+Pose estimation: keypoint detection (COCO, MPII), 3D pose (Human3.6M), multi-person.
+Action recognition: video classification (Kinetics), temporal models (I3D, SlowFast, VideoMAE).
+Medical imaging: classification, segmentation, detection (lung nodules, tumors, fractures).
+Autonomous driving: perception (3D detection, lane detection), prediction, planning.
+AR/VR: SLAM, 3D reconstruction, novel view synthesis (NeRF, 3D Gaussian Splatting).
+
+=== CODING: Security-Focused Development ===
+Secure SDLC: threat modeling (STRIDE, PASTA), secure design, code review, SAST/DAST/IAST/SCA.
+Input validation: allowlists, sanitization, encoding, parameterization, content security policy.
+Secrets management: vault, key rotation, least privilege, zero trust, hardware security modules.
+Dependency management: SBOM, vulnerability scanning (Dependabot, Snyk, Trivy), license compliance.
+Logging & monitoring: structured logging, correlation IDs, alerting, anomaly detection, SIEM.
+Incident response: preparation, detection, containment, eradication, recovery, lessons learned.
+
+=== CYBERSECURITY: Offensive Security ===
+Reconnaissance: passive (OSINT, WHOIS, DNS, certificates), active (port scanning, service enumeration).
+Vulnerability assessment: scanning (Nessus, OpenVAS), manual testing, fuzzing (AFL, libFuzzer).
+Exploitation: Metasploit, Cobalt Strike, custom exploits, privilege escalation, lateral movement.
+Post-exploitation: persistence, credential dumping, data exfiltration, covering tracks.
+Red teaming: ATT&CK framework, C2 frameworks, evasion, OPSEC, reporting.
+Bug bounty: scope, reconnaissance, vulnerability classes, responsible disclosure, ethics.
+
+=== PSYCHOLOGY: Behavioral Analysis ===
+Behavioral profiling: FBI methodology, crime scene analysis, offender characteristics.
+Statement analysis: SCAN, criteria-based content analysis, reality monitoring.
+Interview techniques: cognitive interview, PEACE model, Reid technique (controversial), motivational interviewing.
+Threat assessment: pathway to violence, warning behaviors, leakage, fixation, identification.
+Risk factors: static (history), dynamic (current), protective, structured professional judgment (HCR-20, PCL-R).
+
+=== BODY LANGUAGE: Advanced Applications ===
+Negotiation: mirroring, labeling, calibrated questions, Ackerman model, BATNA.
+Leadership presence: power poses, voice modulation, eye contact, gestures, spatial awareness.
+Sales: rapport building, reading buying signals, objection handling, closing signals.
+Interviewing: baseline establishment, cluster analysis, cognitive load indicators, cultural calibration.
+Law enforcement: interrogation room setup, rapport, theme development, alternative questions.
+Therapeutic: attunement, mirroring, microexpression recognition, somatic markers.
+
+=== COMPUTER VISION: Security Applications ===
+Deepfake detection: temporal inconsistencies, blinking, lighting, frequency artifacts, biological signals.
+Adversarial attacks: FGSM, PGD, C&W, patch attacks, physical-world attacks; defenses: adversarial training, certification.
+Privacy: face blurring, differential privacy, federated learning, homomorphic encryption, secure multiparty computation.
+Surveillance: person re-identification, crowd counting, anomaly detection, behavior analysis.
+Biometrics: fingerprint, iris, palm print, vein patterns, gait recognition, soft biometrics.
+Forensics: image authentication, source camera identification, manipulation detection, steganalysis.
+
+=== CODING: Computer Vision Implementation ===
+OpenCV: core operations, image processing, video analysis, GUI, GPU acceleration (CUDA, OpenCL).
+PyTorch: tensors, autograd, nn.Module, DataLoader, distributed training, ONNX export.
+TensorFlow/Keras: functional API, custom layers, callbacks, TensorBoard, TFLite, TF.js.
+Hugging Face: transformers, datasets, accelerate, PEFT (LoRA), inference endpoints.
+ONNX Runtime: optimization, quantization, TensorRT, OpenVINO, CoreML, DirectML.
+Deployment: Docker, Kubernetes, Triton Inference Server, BentoML, FastAPI, gRPC.
+
+=== CYBERSECURITY: ML/AI Security ===
+Adversarial ML: evasion, poisoning, model extraction, membership inference, attribute inference.
+Data poisoning: targeted, untargeted, clean-label, backdoor (trojan), supply chain.
+Model theft: query-based extraction, side-channel, watermarking, fingerprinting.
+Privacy attacks: model inversion, attribute inference, membership inference, reconstruction.
+Defenses: differential privacy (DP-SGD), federated learning, secure aggregation, homomorphic encryption.
+Robustness: certified defenses, randomized smoothing, adversarial training, input preprocessing.
+
+=== PSYCHOLOGY: Human-Computer Interaction ===
+Cognitive load theory: intrinsic, extraneous, germane; measurement (NASA-TLX, pupillometry).
+User experience: usability, accessibility, affordances, signifiers, feedback, mental models.
+Persuasive technology: Fogg Behavior Model, Cialdini principles, gamification, dark patterns.
+Attention economy: variable rewards, infinite scroll, notifications, habit formation (Hook model).
+Digital wellbeing: screen time, focus modes, behavioral nudges, ethical design.
+Human-AI interaction: trust calibration, explainability, anthropomorphism, automation bias.
+
+=== INTEGRATION: Cross-Domain Applications ===
+Security awareness training: phishing simulation, behavioral conditioning, gamification, metrics.
+Social engineering: pretexting, phishing (spear, whale, clone), vishing, smishing, baiting, tailgating.
+Insider threat: behavioral indicators, UEBA, DLP, psychological factors, organizational culture.
+Deception technology: honeypots, honeytokens, canary tokens, deception networks, active defense.
+Threat intelligence: OSINT, dark web monitoring, actor profiling, TTP analysis, attribution.
+Incident response psychology: stress management, decision making under pressure, team dynamics, after-action review.
+
+=== ADDITIONAL: Practical Coding Examples ===
+# Python: Secure password hashing
+import bcrypt, secrets
+def hash_password(password: str) -> str:
+    salt = bcrypt.gensalt(rounds=12)
+    return bcrypt.hashpw(password.encode(), salt).decode()
+def verify_password(password: str, hashed: str) -> bool:
+    return bcrypt.checkpw(password.encode(), hashed.encode())
+
+# Python: JWT with RS256
+from jose import jwt
+from cryptography.hazmat.primitives import serialization
+private_key = open("private.pem", "rb").read()
+token = jwt.encode({"sub": "user123", "exp": 1735689600}, private_key, algorithm="RS256")
+
+# Python: OpenCV face detection
+import cv2
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+
+# Python: YOLOv8 inference
+from ultralytics import YOLO
+model = YOLO('yolov8n.pt')
+results = model.predict(source='image.jpg', conf=0.25, iou=0.7, classes=[0])  # person class
+
+# JavaScript: Secure fetch with CSP
+fetch('/api/data', {headers: {'Content-Type': 'application/json'}, credentials: 'include'})
+.then(r => r.json()).then(data => console.log(data)).catch(console.error)
+
+# Rust: Memory-safe buffer handling
+use std::io::Read;
+fn read_safe(mut stream: impl Read) -> Vec<u8> {
+    let mut buf = vec![0u8; 1024];
+    let n = stream.read(&mut buf).unwrap_or(0);
+    buf.truncate(n);
+    buf
+}

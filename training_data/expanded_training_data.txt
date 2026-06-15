@@ -1,0 +1,210 @@
+# MAYA Training Data - Uncensored Multi-Domain Corpus (Expanded)
+# Domains: Coding, Cybersecurity, Psychology, Body Language, Computer Vision
+
+=== CODING: Python Advanced ===
+Python metaclasses: type is the default metaclass, __new__ creates class, __init__ initializes.
+Descriptors: __get__, __set__, __delete__ for attribute access control (property, classmethod, staticmethod).
+Decorators: function/class decorators, functools.wraps, parameterized decorators, class decorators.
+Context managers: __enter__, __exit__, contextlib.contextmanager, ExitStack for resource management.
+Generators: yield, yield from, generator expressions, itertools, coroutines with async/await.
+Asyncio: event loop, tasks, futures, synchronization (Lock, Semaphore, Event), streams, subprocesses.
+Multiprocessing: Process, Pool, Queue, Pipe, shared memory, managers, spawn vs fork.
+C extensions: Cython, pybind11, ctypes, cffi, CPython API for performance-critical code.
+Type system: generics, TypeVar, Protocol, TypedDict, Literal, Final, overload, generics.
+Testing: pytest fixtures, parametrize, mock, hypothesis for property-based testing, coverage.
+Packaging: pyproject.toml, build backends (setuptools, flit, poetry, hatch), wheels, sdist.
+
+=== CODING: JavaScript/TypeScript Deep Dive ===
+TypeScript: structural typing, conditional types, mapped types, template literal types, inference.
+Advanced types: never, unknown, satisfies, const assertions, type predicates, assertion functions.
+Module system: ESM, CommonJS, dynamic import, import maps, top-level await, package.json exports.
+Runtime: V8 internals, JIT compilation, hidden classes, inline caching, garbage collection (Orinoco).
+Event loop: microtasks, macrotasks, requestAnimationFrame, requestIdleCallback, queueMicrotask.
+Web APIs: Fetch, Streams, Web Workers, Service Workers, WebAssembly, WebGPU, WebRTC.
+Frameworks internals: React fiber reconciliation, Vue reactivity (Proxy), Svelte compiler, Solid signals.
+State management: flux, redux middleware, immer, valtio, jotai, recoil, signals, observables.
+Build: Vite plugin API, Rollup hooks, esbuild Go architecture, Turbopack Rust, SWC.
+Testing: Vitest, Playwright, Cypress, testing-library, MSW for API mocking, storybook.
+
+=== CODING: Systems Languages ===
+Rust: ownership, borrowing, lifetimes, trait objects, dyn, generics, const generics, GATs.
+Async Rust: Future trait, Pin, poll, Waker, executors (tokio, async-std, smol), async traits.
+Unsafe: raw pointers, FFI, inline assembly, union, MaybeUninit, transmute, soundness.
+Macros: declarative (macro_rules), procedural (derive, attribute, function-like), quote, syn.
+Cargo: workspaces, features, profiles, build scripts, publish, registry, alternative registries.
+C++20/23: concepts, modules, coroutines, ranges, spaceship operator, std::format, std::print.
+Memory: allocators, custom new/delete, placement new, alignment, memory pools, arena allocation.
+Concurrency: atomics, memory ordering, lock-free, RCU, hazard pointers, epoch-based reclamation.
+SIMD: intrinsics, std::simd, portable SIMD, auto-vectorization, runtime dispatch.
+Embedded: no_std, cortex-m, embassy, RTOS (FreeRTOS, Zephyr), bare metal, bootloaders.
+
+=== CYBERSECURITY: Complete Penetration Testing ===
+Methodology: PTES, NIST 800-115, OSSTMM, ISSAF, OWASP Testing Guide, MITRE ATT&CK.
+Recon: passive (Shodan, Censys, DNSdumpster, certificate transparency, Wayback, GitHub dorks).
+Active: nmap (SYN, UDP, script scanning), masscan, zmap, service enumeration, banner grabbing.
+Web: directory bruteforce (ffuf, gobuster, feroxbuster), parameter discovery, technology fingerprinting.
+Vuln scanning: Nessus, OpenVAS, Nuclei templates, custom checks, false positive reduction.
+Exploitation: Metasploit modules, exploit development (ROP, heap, kernel), payload generation (msfvenom).
+Post-exploit: Meterpreter, Cobalt Strike Beacon, Sliver, Havoc, Brute Ratel, custom C2.
+PrivEsc: kernel exploits, sudo misconfig, SUID, capabilities, cron, PATH, services, drivers.
+Lateral: Pass-the-Hash, Pass-the-Ticket, Overpass-the-Hash, DCOM, WMI, WinRM, SSH keys, Kerberos.
+Persistence: registry, services, scheduled tasks, WMI, COM hijacking, DLL search order, bootkit.
+Evasion: AMSI bypass, ETW patching, syscall unhooking, direct syscalls, Heaven's Gate, Hell's Gate.
+Data exfil: DNS, HTTPS, ICMP, cloud storage, steganography, covert channels, encryption.
+Reporting: executive summary, technical findings, risk ratings (CVSS), remediation, retest.
+
+=== CYBERSECURITY: Application Security Deep ===
+SAST: CodeQL, Semgrep, SonarQube, Checkmarx, Fortify, custom rules, data flow analysis.
+DAST: OWASP ZAP, Burp Suite, Nuclei, custom scanners, authenticated scanning, API testing.
+IAST: Contrast, agent-based, runtime analysis, taint tracking, real-time feedback.
+SCA: Dependency-Check, Snyk, Dependabot, Renovate, SBOM (SPDX, CycloneDX), license compliance.
+Container security: Trivy, Grype, Syft, Cosign, Kyverno, admission controllers, runtime security (Falco).
+Supply chain: SLSA, Sigstore, in-toto, provenance, hermetic builds, reproducible builds.
+Secrets: GitLeaks, TruffleHog, detect-secrets, pre-commit hooks, vault integration, rotation.
+DevSecOps: pipeline integration, policy as code (OPA/Rego), gate checks, break builds, dashboards.
+Threat modeling: STRIDE, PASTA, LINDDUN, attack trees, data flow diagrams, trust boundaries.
+Secure coding: CWE Top 25, CERT standards, MISRA, language-specific guidelines, code review checklists.
+
+=== CYBERSECURITY: Cryptography Implementation ===
+Libraries: OpenSSL, BoringSSL, LibreSSL, libsodium, ring, rustls, Go crypto, Java JCA.
+Key management: HSM, KMS, CloudHSM, Azure Key Vault, AWS KMS, HashiCorp Vault, age, sops.
+Protocols: TLS 1.3, Noise Protocol, Signal Protocol, WireGuard, SSH, IPsec, QUIC, DTLS.
+Post-quantum: Kyber (KEM), Dilithium (signatures), SPHINCS+, FALCON, hybrid schemes, NIST PQC.
+Zero-knowledge: zk-SNARKs, zk-STARKs, Bulletproofs, PLONK, Halo2, Circom, RISC Zero, SP1.
+MPC: threshold signatures (FROST, GG20), secret sharing (Shamir, Feldman), oblivious transfer.
+Homomorphic: CKKS, BFV, TFHE, OpenFHE, Microsoft SEAL, Concrete, performance tradeoffs.
+Side-channels: timing, power, EM, cache, branch prediction, constant-time programming, masking.
+
+=== PSYCHOLOGY: Complete Behavioral Science ===
+Cognitive: attention (spotlight, zoom-lens, biased competition), memory (levels of processing, schemas).
+Decision: bounded rationality, heuristics (representativeness, availability, affect), prospect theory.
+Social: conformity (Asch), obedience (Milgram), bystander effect, social facilitation, loafing.
+Attribution: correspondent inference, covariation model, discounting principle, ultimate attribution error.
+Self: self-concept, self-esteem, self-efficacy, self-regulation, possible selves, narrative identity.
+Motivation: intrinsic/extrinsic, self-determination theory, goal-setting, expectancy-value, mindset.
+Emotion: basic emotions, appraisal theory, constructionist, regulation (Gross process model), alexithymia.
+Personality: trait theory, psychoanalytic, humanistic, social-cognitive, biological, cultural.
+Development: Piaget, Vygotsky, Erikson, attachment (Ainsworth), moral (Kohlberg, Haidt), aging.
+Abnormal: diathesis-stress, biopsychosocial, RDoC, transdiagnostic, evidence-based treatments.
+Therapy: CBT (Beck), DBT (Linehan), ACT (Hayes), EMDR (Shapiro), psychodynamic, humanistic, systemic.
+
+=== PSYCHOLOGY: Applied Behavioral Analysis ===
+Profiling: inductive/deductive, geographical, investigative, offender characteristics, crime linkage.
+Deception: verbal (CBCA, RM, SCAN), nonverbal (microexpressions, leakage), physiological (polygraph, fMRI).
+Interviewing: cognitive interview (Fisher & Geiselman), PEACE, investigative, therapeutic, motivational.
+Influence: Cialdini 6 principles, commitment/consistency, social proof, authority, liking, scarcity, unity.
+Negotiation: Harvard method, BATNA, ZOPA, anchoring, framing, logrolling, contingent contracts.
+Leadership: transformational, transactional, servant, authentic, situational, LMX, followership.
+Groups: Tuckman stages, groupthink (Janis), polarization, minority influence, diversity, virtual teams.
+Culture: Hofstede dimensions, Schwartz values, tight/loose, honor/dignity/face, acculturation.
+Organizational: culture, climate, engagement, burnout, turnover, counterproductive work behavior, safety.
+
+=== BODY LANGUAGE: Comprehensive Nonverbal ===
+Face: FACS (Ekman/Friesen), action units, microexpressions, subtle expressions, masked faces.
+Eyes: gaze patterns, mutual gaze, gaze aversion, pupil dilation (cognitive load, arousal), blink rate.
+Body: posture (open/closed, expansive/contractive), lean, orientation, mirroring, postural echo.
+Hands: illustrators (batonic, deictic, rhythmic, spatial), manipulators (self-touch, object), emblems.
+Feet/legs: direction, crossing, bouncing, locking, foot pointing, leg cleavage, knee position.
+Voice: pitch, volume, rate, pauses, fillers, articulation, resonance, vocal fry, uptalk.
+Space: Hall's zones, territorial markers, personal space invasion, seating arrangements, desk barriers.
+Touch: functional, social, friendship, love, sexual, aggressive, cultural variations, gender.
+Timing: synchrony, mimicry, interactional synchrony, entrainment, turn-taking, overlap.
+Clusters: congruence/incongruence, baseline, context, culture, individual differences, deliberate control.
+
+=== BODY LANGUAGE: Deception & Credibility ===
+Models: leakage-deception, four-factor (Zuckerman), cognitive load (Vrij), attempted control.
+Verbal cues: detail, consistency, plausibility, spontaneity, admissions, self-references, hedging.
+Nonverbal: gaze (not reliable), posture shifts, self-adaptors, speech errors, response latency.
+Physiological: SCR, heart rate, blood pressure, respiration, voice stress, thermal imaging.
+Techniques: baseline, BAI, CBCA, RM, SCAN, polygraph (CQT, GKT), fMRI, eye tracking.
+Countermeasures: information manipulation, physiological, behavioral, drugs, yoga/meditation.
+Pitfalls: Othello error, brokaw hazard, confirmation bias, cultural differences, mental illness.
+Ethics: false accusations, privacy, coercion, admissibility (Daubert, Frye), human rights.
+
+=== COMPUTER VISION: Classical to Modern ===
+Image formation: pinhole, lens, sensor (CCD/CMOS), noise (shot, read, dark, quantization), ISP pipeline.
+Features: edges (Canny, Sobel, Laplacian), corners (Harris, Shi-Tomasi, FAST, AGAST), blobs (LoG, DoG, SIFT).
+Descriptors: SIFT, SURF, ORB, BRISK, FREAK, BRIEF, LATCH, deep learned (SuperPoint, D2-Net, R2D2).
+Matching: brute force, FLANN, ratio test, geometric verification (RANSAC, PROSAC, MAGSAC).
+Geometry: epipolar, essential/fundamental matrix, homography, triangulation, bundle adjustment, SfM, SLAM.
+Detection: Viola-Jones, HOG+SVM, DPM, selective search, EdgeBoxes, region proposals.
+Segmentation: thresholding, watershed, graph cuts, GrabCut, CRF, superpixels (SLIC, SEEDS), normalized cuts.
+Tracking: KLT, mean shift, CAMShift, particle filter, Kalman, correlation filters (MOSSE, KCF, CSRT).
+Recognition: bag of words, VLAD, Fisher vectors, SPM, CNN features, metric learning, few-shot.
+
+=== COMPUTER VISION: Deep Learning Architectures ===
+CNN: convolution, pooling, stride, dilation, depthwise separable, grouped, residual, dense connections.
+Backbones: ResNet (v1/v1b/v1c/v1d), ResNeXt, DenseNet, EfficientNet (v1/v2), ConvNeXt, RegNet, NFNet.
+Attention: SE, CBAM, ECA, CoordAtt, transformer attention, axial, criss-cross, lambda, global.
+Detection: anchor-based (Faster R-CNN, RetinaNet, YOLO v2/v3/v4/v5), anchor-free (FCOS, CenterNet, YOLOX).
+YOLO evolution: v1 (regression), v2 (batch norm, anchor), v3 (multi-scale), v4 (CSP, PAN), v5 (PyTorch).
+YOLO v6/v7/v8/v9/v10: decoupled head, anchor-free, OBB, instance segmentation, pose, tracking.
+Transformers: ViT (patch embedding, cls token, positional encoding), Swin (hierarchical, shifted windows).
+DeiT (distillation), PVT (pyramid), SwinV2, ConvNeXtV2, MAE (masked autoencoding), DINOv2.
+Segmentation: FCN, U-Net, DeepLab v3/v3+, PANet, Mask R-CNN, Segment Anything (SAM), HQ-SAM.
+Video: 3D CNN (I3D, SlowFast, R(2+1)D), video transformers (VideoMAE, MViT, TimeSformer), MoViNet.
+Generative: GAN (StyleGAN 1/2/3, BigGAN), VAE, Diffusion (DDPM, DDIM, LDM, Stable Diffusion, SDXL).
+NeRF: original, Mip-NeRF, Instant-NGP, Zip-NeRF, 3D Gaussian Splatting, depth supervision.
+
+=== COMPUTER VISION: Security & Privacy ===
+Adversarial: FGSM, BIM, PGD, MIM, C&W, DeepFool, AutoAttack, Square, Boundary, spatial transforms.
+Defenses: adversarial training (PGD, TRADES, MART), certified (randomized smoothing, IBP, CROWN-IBP).
+Detection: feature squeezing, MagNet, LID, Mahalanobis, ODIN, Gram matrix, neural fingerprint.
+Backdoors: BadNets, TrojanNN, WaNet, ISSBA, reflection, blended, dynamic, clean-label, semantic.
+Privacy: differential privacy (DP-SGD, PATE), federated learning (FedAvg, FedProx, SCAFFOLD, MOON).
+Membership inference: shadow models, metric-based, label-only, generative, blind, active.
+Model extraction: query synthesis, Jacobian, distillation, active thief, knockoff nets, API protection.
+Watermarking: embedding, extraction, robustness, capacity, false positive, ownership verification.
+Inversion: gradient-based, GAN-based, generative prior, attribute inference, property inference.
+Fairness: demographic parity, equalized odds, calibration, counterfactual, individual, intersectional.
+
+=== COMPUTER VISION: Production Deployment ===
+Optimization: quantization (PTQ, QAT, INT8, INT4, mixed precision), pruning (magnitude, structured, lottery).
+Distillation: knowledge distillation, feature-based, relation-based, self-distillation, online.
+Compilation: TensorRT, OpenVINO, TVM, ONNX Runtime, XLA, MLC LLM, Apache TVM Unity.
+Serving: Triton, TorchServe, TF Serving, BentoML, FastAPI, gRPC, REST, batching, dynamic batching.
+Edge: TensorFlow Lite, CoreML, NCNN, MNN, SNPE, RKNN, Vitis AI, Qualcomm SNPE, ARM Compute Library.
+Mobile: PyTorch Mobile, LiteRT, MediaPipe, ML Kit, Fritz AI, on-device training, personalization.
+Monitoring: drift detection (data, concept, label), performance, latency, throughput, error rates, alerting.
+MLOps: MLflow, Kubeflow, ClearML, Weights & Biases, DVC, Feast, ZenML, Flyte, Prefect, Dagster.
+A/B testing: experimentation platform, statistical significance, guardrail metrics, ramp-up, rollback.
+
+=== INTEGRATION: Security-Aware Computer Vision ===
+Deepfake: generation (FaceSwap, DeepFaceLab, First Order, FOMM, StyleGAN, DiffAE, Roop).
+Detection: spatial (artifacts, blending, lighting), temporal (flicker, consistency, biological signals).
+Audio-visual: lip-sync (Wav2Lip, SadTalker, GeneFace), voice conversion (RVC, So-VITS-SVC, DDSP-SVC).
+Biometrics: face (ArcFace, CosFace, AdaFace, ElasticFace), fingerprint, iris, palm, vein, gait, periocular.
+Presentation attack: print, replay, 3D mask, makeup, contact lenses, deepfake injection, wax figures.
+PAD: texture (LBP, BSIF, HOG), motion (rPPG, eye blink, head pose), depth (structured light, ToF).
+Surveillance: ReID (OSNet, TransReID, CLIP-ReID), MOT (DeepSORT, ByteTrack, BoT-SORT, OC-SORT).
+Crowd: counting (CSRNet, Bay, DM-Count, P2PNet), density estimation, social distancing, anomaly.
+Behavior: action recognition, interaction detection, violence, fall, theft, loitering, crowd dynamics.
+Forensics: source identification (PRNU, sensor pattern), manipulation (copy-move, splicing, inpainting).
+Steganography: LSB, DCT, DWT, spread spectrum, adaptive, deep learning (StegNet, SSGAN, UDH).
+
+=== INTEGRATION: Psychological Security Applications ===
+Social engineering: phishing (email, spear, whale, clone, BEC), vishing, smishing, quishing (QR).
+Pretexting: identity, authority, urgency, scarcity, familiarity, helpfulness, fear, greed, curiosity.
+Phishing frameworks: Gophish, King Phisher, Social-Analyzer, Evilginx2, Modlishka, Muraena.
+Training: simulated phishing, CBT, gamification, microlearning, adaptive, metrics (click, report, dwell).
+Insider threat: CERT model, behavioral indicators (IT sabotage, theft, fraud, espionage), UEBA.
+Risk factors: personal (financial, substance, mental health), organizational (culture, access, monitoring).
+Detection: DLP, SIEM, UEBA (Exabeam, Securonix, Splunk UBA), psychometrics, peer reporting.
+Mitigation: least privilege, separation of duties, job rotation, mandatory leave, exit interviews.
+Deception: honeypots (low/interaction, high-interaction, pure), honeytokens, canary tokens, deception nets.
+Active defense: tarpits, sinkholes, threat intelligence sharing, takedowns, attribution, legal.
+Threat intel: OSINT (Maltego, SpiderFoot, Recon-ng), dark web, actor profiling, TTP mapping, ATT&CK.
+Attribution: technical (code, infrastructure, timing), geopolitical, linguistic, false flags, confidence levels.
+
+=== CODING: Secure Computer Vision Systems ===
+Input validation: image format verification, size limits, EXIF stripping, decompression bomb protection.
+Model security: ONNX verification, signature verification, sandboxing (gVisor, Kata, Firecracker).
+Data privacy: federated training, secure aggregation, differential privacy, homomorphic inference.
+Adversarial robustness: certified radius, randomized smoothing, adversarial training, input preprocessing.
+Supply chain: model signing (Cosign, Sigstore), SBOM for ML (ML-BOM), provenance, reproducibility.
+Monitoring: prediction drift, concept drift, adversarial detection, OOD detection, uncertainty estimation.
+Explainability: Grad-CAM, SHAP, LIME, Integrated Gradients, attention visualization, counterfactuals.
+Compliance: GDPR (right to explanation), AI Act (high-risk AI), sectoral (medical, automotive, finance).
+Ethics: bias auditing, disparate impact, fairness metrics, stakeholder engagement, impact assessment.
+Governance: model cards, data sheets, risk assessments, audit trails, versioning, rollback procedures.
+
