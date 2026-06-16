@@ -4,4 +4,39 @@
 
 NOAH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$NOAH_DIR/venv/bin/activate"
-python "$NOAH_DIR/maya_bpe.py" "$@"
+
+case "$1" in
+    train)
+        shift
+        python "$NOAH_DIR/noah_train.py" "$@"
+        ;;
+    chat)
+        shift
+        python "$NOAH_DIR/noah_chat.py" "$@"
+        ;;
+    tokenizer)
+        shift
+        python "$NOAH_DIR/noah_tokenizer.py" "$@"
+        ;;
+    api)
+        shift
+        python "$NOAH_DIR/noah_api.py" "$@"
+        ;;
+    *)
+        echo "NOAH LLM - Clean Uncensored Transformer"
+        echo ""
+        echo "Usage: noah <command> [args]"
+        echo ""
+        echo "Commands:"
+        echo "  train      Train NOAH model (--size small|medium|large --epochs N --batch-size N)"
+        echo "  chat       Interactive chat (--size small|medium|large)"
+        echo "  tokenizer  Train BPE tokenizer"
+        echo "  api        Start OpenAI-compatible API server (--model-size small|medium|large)"
+        echo ""
+        echo "Examples:"
+        echo "  noah tokenizer"
+        echo "  noah train --size small --epochs 3 --batch-size 16"
+        echo "  noah chat --size small"
+        echo "  noah api --model-size small"
+        ;;
+esac

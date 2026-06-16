@@ -1,63 +1,58 @@
-# NOAH LLM - Uncensored Local Transformer
+# NOAH LLM - Clean Uncensored Transformer
 
-A completely uncensored, self-hosted language model trained on coding, cybersecurity, psychology, body language, and computer vision domains.
+A completely rewritten, uncensored local LLM. No MAYA legacy code.
 
-## Features
+## Files
 
-- **Fully Local**: Runs offline, no API keys needed
-- **Uncensored**: No hardcoded safety filters
-- **Domain Expertise**: Trained on coding, cybersec, psychology, body language, computer vision
-- **Multiple Sizes**: Small (7M), Medium (40M), Large (150M) parameters
-- **BPE Tokenizer**: 16K vocab trained on your data
-- **Ollama-style CLI**: `noah pull`, `noah run`, `noah list`
+| File | Purpose |
+|------|---------|
+| `noah_model.py` | Core transformer architecture |
+| `noah_tokenizer.py` | BPE tokenizer trainer |
+| `noah_train.py` | Training script |
+| `noah_chat.py` | Interactive chat |
+| `noah_api.py` | OpenAI-compatible API server |
 
 ## Quick Start
 
-### Train on Kaggle (Free GPU)
-```python
-# In Kaggle notebook with GPU T4 x2
-!git clone https://github.com/susheel-cybercode/MAYA_AI.git
-%cd MAYA_AI
-!pip install -q -r requirements.txt tokenizers
-!python train_bpe_tokenizer.py
-!python maya_bpe.py --train --size small --epochs 3 --batch-size 16
+### 1. Install Dependencies
+```bash
+pip install -r requirements.txt
 ```
 
-### Train Locally (CPU)
+### 2. Train Tokenizer
 ```bash
-cd /home/susheel/Desktop/MAYA\ AI
-source venv/bin/activate
-python train_bpe_tokenizer.py
-python maya_bpe.py --train --size small --epochs 1 --batch-size 2
+python noah_tokenizer.py
 ```
 
-### Chat with Trained Model
+### 3. Train Model (Kaggle GPU recommended)
 ```bash
-python maya_bpe.py --size small
+python noah_train.py --size small --epochs 3 --batch-size 16
 ```
 
-### Ollama-style CLI
+### 4. Chat
 ```bash
-./noah pull small
-./noah run small
-./noah run small "What is SQL injection?"
-./noah list
+python noah_chat.py --size small
+```
+
+### 5. API Server (for Apple of Eden)
+```bash
+python noah_api.py --model-size small
+# Runs on http://localhost:8000
 ```
 
 ## Model Sizes
 
-| Size | Params | VRAM (train) | VRAM (infer) | Use Case |
-|------|--------|--------------|--------------|----------|
-| Small | ~7M | 2GB | 1GB | Phone, testing |
-| Medium | ~40M | 8GB | 4GB | Laptop, balanced |
-| Large | ~150M | 24GB | 12GB | Server, quality |
+| Size | Params | Layers | Heads | Dim | FF Dim |
+|------|--------|--------|-------|-----|--------|
+| Small | ~7M | 4 | 4 | 256 | 1024 |
+| Medium | ~40M | 8 | 8 | 512 | 2048 |
+| Large | ~150M | 12 | 12 | 768 | 3072 |
 
-## Integration with Apple of Eden
+## Apple of Eden Integration
 
-Run NOAH as OpenAI-compatible API server:
 ```bash
-# Terminal 1: Start API server
-python maya_api_server.py
+# Terminal 1: Start NOAH API
+python noah_api.py
 
 # Terminal 2: Configure Eden
 cd /home/susheel/Desktop/theappleofeden
@@ -76,12 +71,42 @@ python eden_core.py --chat
 
 ## Training Data
 
-Add `.txt` files to `training_data/` and re-run:
+Add `.txt` files to `training_data/` directory. Supports:
+- Code (Python, JS, Rust, etc.)
+- Cybersecurity docs
+- Psychology texts
+- Body language research
+- Computer vision papers
+- Any domain text
+
+Retrain tokenizer and model after adding data:
 ```bash
-python train_bpe_tokenizer.py
-python maya_bpe.py --train --size small --epochs 3 --batch-size 8
+python noah_tokenizer.py
+python noah_train.py --size small --epochs 3 --batch-size 16
 ```
+
+## Kaggle Free GPU
+
+1. Go to kaggle.com/code → New Notebook → GPU T4 x2
+2. Run:
+```python
+!git clone https://github.com/susheel-cybercode/NOAH_LLM.git
+%cd NOAH_LLM
+!pip install -q -r requirements.txt
+!python noah_tokenizer.py
+!python noah_train.py --size small --epochs 3 --batch-size 16
+```
+3. File → Save Version → Download model files
+
+## Architecture
+
+- Pre-norm Transformer
+- Multi-head causal attention
+- GELU feed-forward
+- Weight-tied embeddings
+- BPE tokenization (16K vocab)
+- Top-k + Top-p sampling
 
 ## License
 
-MIT License
+MIT
